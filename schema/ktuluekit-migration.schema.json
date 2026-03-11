@@ -1,0 +1,127 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/Ktulue/KtulueKit-Migration/schema/ktuluekit-migration.schema.json",
+  "title": "KtulueKit Migration Configuration",
+  "description": "Declarative configuration for restoring application state from a backup to a fresh Windows 11 install.",
+  "type": "object",
+  "required": ["version", "metadata", "backup_root", "apps"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Path to the JSON schema for editor validation."
+    },
+    "version": {
+      "type": "string",
+      "description": "Schema version identifier.",
+      "examples": ["1.0"]
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Project-level information about this migration config.",
+      "required": ["name", "author"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name of this migration configuration."
+        },
+        "author": {
+          "type": "string",
+          "description": "Author of this configuration."
+        },
+        "description": {
+          "type": "string",
+          "description": "Brief description of what this config migrates."
+        },
+        "repository": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the source repository."
+        }
+      }
+    },
+    "backup_root": {
+      "type": "string",
+      "description": "Root path to the backup location. Can use environment variables (%VAR%) or be an absolute path.",
+      "examples": ["D:\\KtulueBackup", "%USERPROFILE%\\Backup"]
+    },
+    "apps": {
+      "type": "array",
+      "description": "Applications whose state should be migrated.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "category", "items"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Display name of the application."
+          },
+          "category": {
+            "type": "string",
+            "description": "Grouping category for the UI.",
+            "examples": ["Streaming", "Browser & Identity", "Media Assets", "Shell & Terminal"]
+          },
+          "items": {
+            "type": "array",
+            "description": "Individual file or directory copy operations for this app.",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["label", "source", "target"],
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "description": "Short descriptive label for this copy operation."
+                },
+                "source": {
+                  "type": "string",
+                  "description": "Path relative to backup_root, or an absolute path. Supports %VAR% environment variables."
+                },
+                "target": {
+                  "type": "string",
+                  "description": "Destination path on the fresh install. Supports %VAR% environment variables.",
+                  "examples": ["%APPDATA%/obs-studio/basic"]
+                },
+                "strategy": {
+                  "type": "string",
+                  "enum": ["mirror", "file", "glob"],
+                  "default": "mirror",
+                  "description": "Copy strategy. 'mirror' copies a full directory tree, 'file' copies a single file, 'glob' matches a pattern. Skateboard uses mirror only."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Human-readable description of what this item contains."
+                },
+                "notes": {
+                  "type": "string",
+                  "description": "Additional context or caveats about this copy operation."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "profiles": {
+      "type": "array",
+      "description": "Named presets that select subsets of items by their composite ID (AppName:label).",
+      "items": {
+        "type": "object",
+        "required": ["name", "ids"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Display name for this profile preset."
+          },
+          "ids": {
+            "type": "array",
+            "description": "List of item IDs in 'AppName:label' format.",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

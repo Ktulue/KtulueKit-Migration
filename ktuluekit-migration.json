@@ -1,0 +1,141 @@
+{
+  "$schema": "./schema/ktuluekit-migration.schema.json",
+  "version": "1.0",
+  "metadata": {
+    "name": "KtulueKit Migration",
+    "author": "Ktulue",
+    "description": "Personal state restoration for a fresh Windows 11 install. Copies app profiles, configs, and media from a backup location to the correct W11 paths.",
+    "repository": "https://github.com/Ktulue/KtulueKit-Migration"
+  },
+  "backup_root": "D:\\KtulueBackup",
+  "apps": [
+    {
+      "name": "OBS Studio",
+      "category": "Streaming",
+      "items": [
+        {
+          "label": "scenes & profiles",
+          "source": "obs-studio/basic",
+          "target": "%APPDATA%/obs-studio/basic",
+          "description": "Scene collections and profile configurations",
+          "notes": "Includes all scene JSON files and profile settings"
+        },
+        {
+          "label": "plugin configs",
+          "source": "obs-studio/plugin_config",
+          "target": "%APPDATA%/obs-studio/plugin_config",
+          "description": "Third-party plugin configuration data"
+        }
+      ]
+    },
+    {
+      "name": "Streamer.bot",
+      "category": "Streaming",
+      "items": [
+        {
+          "label": "actions & commands",
+          "source": "streamerbot/data",
+          "target": "%APPDATA%/Streamer.bot/data",
+          "description": "Actions, commands, and automation database",
+          "notes": "Contains the .db file and action exports"
+        },
+        {
+          "label": "settings",
+          "source": "streamerbot/settings",
+          "target": "%APPDATA%/Streamer.bot/settings",
+          "description": "Application settings and connection configs"
+        }
+      ]
+    },
+    {
+      "name": "Stream Deck",
+      "category": "Streaming",
+      "items": [
+        {
+          "label": "profiles & icons",
+          "source": "streamdeck/ProfilesV2",
+          "target": "%APPDATA%/Elgato/StreamDeck/ProfilesV2",
+          "description": "Stream Deck button layouts, pages, and custom icons"
+        }
+      ]
+    },
+    {
+      "name": "Brave Browser",
+      "category": "Browser & Identity",
+      "items": [
+        {
+          "label": "user profile",
+          "source": "brave/User Data/Default",
+          "target": "%LOCALAPPDATA%/BraveSoftware/Brave-Browser/User Data/Default",
+          "description": "Bookmarks, history, saved passwords, and settings",
+          "notes": "Extensions may need to be re-enabled or reinstalled manually after copy"
+        },
+        {
+          "label": "local state",
+          "source": "brave/User Data/Local State",
+          "target": "%LOCALAPPDATA%/BraveSoftware/Brave-Browser/User Data/Local State",
+          "description": "Browser-level settings and profile metadata"
+        }
+      ]
+    },
+    {
+      "name": "GIFs & Media Assets",
+      "category": "Media Assets",
+      "items": [
+        {
+          "label": "stream media",
+          "source": "media/stream-assets",
+          "target": "%USERPROFILE%/Documents/StreamAssets",
+          "description": "GIFs, overlays, alert media, and other streaming visuals"
+        }
+      ]
+    },
+    {
+      "name": "PowerShell",
+      "category": "Shell & Terminal",
+      "items": [
+        {
+          "label": "profile (oh-my-posh)",
+          "source": "powershell/Microsoft.PowerShell_profile.ps1",
+          "target": "%USERPROFILE%/Documents/PowerShell/Microsoft.PowerShell_profile.ps1",
+          "description": "PowerShell profile with oh-my-posh theme configuration"
+        }
+      ]
+    }
+  ],
+  "profiles": [
+    {
+      "name": "Full Restore",
+      "ids": [
+        "OBS Studio:scenes & profiles",
+        "OBS Studio:plugin configs",
+        "Streamer.bot:actions & commands",
+        "Streamer.bot:settings",
+        "Stream Deck:profiles & icons",
+        "Brave Browser:user profile",
+        "Brave Browser:local state",
+        "GIFs & Media Assets:stream media",
+        "PowerShell:profile (oh-my-posh)"
+      ]
+    },
+    {
+      "name": "Streaming Only",
+      "ids": [
+        "OBS Studio:scenes & profiles",
+        "OBS Studio:plugin configs",
+        "Streamer.bot:actions & commands",
+        "Streamer.bot:settings",
+        "Stream Deck:profiles & icons",
+        "GIFs & Media Assets:stream media"
+      ]
+    },
+    {
+      "name": "Browser & Identity",
+      "ids": [
+        "Brave Browser:user profile",
+        "Brave Browser:local state",
+        "PowerShell:profile (oh-my-posh)"
+      ]
+    }
+  ]
+}
