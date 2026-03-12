@@ -139,6 +139,8 @@ func (r *Runner) Run() RunResult {
 
 		// Guard: if a dest override is active and the resolved target has no drive prefix,
 		// log as failed and skip — do not copy to a garbage path.
+		// ApplyDestOverride (below) would silently pass through a non-absolute path;
+		// we treat that as a hard failure here so the user sees a clear error.
 		if r.destRootOverride != "" {
 			if len(resolvedTarget) < 3 || resolvedTarget[1] != ':' || resolvedTarget[2] != '\\' {
 				r.reportItemFull(w.app.Name, w.item.Label, sourcePath, resolvedTarget, reporter.StatusFailed, 0, "target path has no drive prefix", nil)
