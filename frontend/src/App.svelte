@@ -4,7 +4,7 @@
   import ProgressScreen from './screens/ProgressScreen.svelte'
   import SummaryScreen from './screens/SummaryScreen.svelte'
   import FolderPicker from './components/FolderPicker.svelte'
-  import { GetConfig, StartMigration, GetSourcePath } from '../wailsjs/go/main/App'
+  import { GetConfig, StartMigration, GetSourcePath, ValidateBackupRoot } from '../wailsjs/go/main/App'
   import { EventsOn, Quit } from '../wailsjs/runtime/runtime'
 
   let screen = 'selection' // 'selection' | 'progress' | 'summary'
@@ -16,10 +16,12 @@
   let pickerItem = null
   let pickerSourcePath = ''
   let dryRun = false
+  let backupRootValid = null // null = checking, true = found, false = missing
 
   onMount(async () => {
     try {
       configView = await GetConfig()
+      backupRootValid = await ValidateBackupRoot()
     } catch (err) {
       configError = err
     }
@@ -66,6 +68,10 @@
     pickerSourcePath = ''
   }
 
+  function handleProfileChange() {
+    selectivePaths = {}
+  }
+
   function handleClose() {
     Quit()
   }
@@ -80,8 +86,10 @@
   {:else if screen === 'selection' && configView}
     <SelectionScreen
       {configView}
+      {backupRootValid}
       onStart={handleStartMigration}
       onOpenPicker={handleOpenPicker}
+      onProfileChange={handleProfileChange}
     />
   {:else if screen === 'progress'}
     <ProgressScreen events={progressEvents} {dryRun} />

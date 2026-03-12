@@ -2,8 +2,10 @@
   import CategoryAccordion from '../components/CategoryAccordion.svelte'
 
   export let configView
+  export let backupRootValid = null
   export let onStart
   export let onOpenPicker = (item) => {}
+  export let onProfileChange = () => {}
 
   let selected = new Set()
   let profileValue = ''
@@ -18,6 +20,7 @@
       selected = new Set(profile.ids)
     }
     profileValue = profileName
+    onProfileChange()
   }
 
   function handleToggle() {
@@ -49,6 +52,18 @@
       </select>
     </div>
   </header>
+
+  {#if backupRootValid === false}
+    <div class="backup-banner backup-missing">
+      <span class="backup-icon">&#9888;</span>
+      Backup not found: <code>{configView.backupRoot}</code> — mount the drive before starting.
+    </div>
+  {:else if backupRootValid === true}
+    <div class="backup-banner backup-ok">
+      <span class="backup-icon">&#10003;</span>
+      Backup: <code>{configView.backupRoot}</code>
+    </div>
+  {/if}
 
   <div class="content">
     {#each configView.categories as category}
@@ -119,6 +134,35 @@
     border-radius: 4px;
     padding: 6px 10px;
     font-size: 13px;
+  }
+
+  .backup-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 20px;
+    font-size: 12px;
+    border-bottom: 1px solid #333;
+  }
+
+  .backup-ok {
+    background: #0d1f14;
+    color: #5cb85c;
+  }
+
+  .backup-missing {
+    background: #2a1500;
+    color: #d4a017;
+  }
+
+  .backup-icon {
+    font-size: 13px;
+  }
+
+  .backup-banner code {
+    font-family: 'Cascadia Code', 'Consolas', monospace;
+    font-size: 11px;
+    opacity: 0.85;
   }
 
   .content {

@@ -17,6 +17,12 @@
     }
   }
 
+  function copyManifestPath() {
+    if (manifestPath) {
+      navigator.clipboard.writeText(manifestPath)
+    }
+  }
+
   function formatBytes(b) {
     if (!b || b === 0) return '0 B'
     const units = ['B', 'KB', 'MB', 'GB']
@@ -103,6 +109,7 @@
         <div class="log-path manifest-path-row">
           <span class="log-label">Manifest:</span>
           <span class="log-file">{manifestPath}</span>
+          <button class="copy-btn" on:click={copyManifestPath}>Copy</button>
         </div>
       {/if}
     </div>
