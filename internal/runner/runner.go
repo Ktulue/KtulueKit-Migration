@@ -4,7 +4,9 @@ package runner
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/Ktulue/KtulueKit-Migration/internal/config"
@@ -26,12 +28,13 @@ type ProgressEvent struct {
 
 // RunResultItem records the outcome of a single item copy.
 type RunResultItem struct {
-	App         string
-	Label       string
-	SourcePath  string
-	TargetPath  string
-	Status      string
-	BytesCopied int64
+	App           string
+	Label         string
+	SourcePath    string
+	TargetPath    string
+	Status        string
+	BytesCopied   int64
+	SelectedPaths []string
 }
 
 // RunResult captures the full migration outcome.
@@ -43,10 +46,12 @@ type RunResult struct {
 
 // Runner orchestrates the migration process.
 type Runner struct {
-	cfg         *config.Config
-	rep         *reporter.Reporter
-	selectedIDs map[string]bool
-	onProgress  func(ProgressEvent)
+	cfg            *config.Config
+	rep            *reporter.Reporter
+	selectedIDs    map[string]bool
+	selectivePaths map[string][]string
+	dryRun         bool
+	onProgress     func(ProgressEvent)
 }
 
 // New creates a Runner with the given config and reporter.
@@ -63,6 +68,16 @@ func (r *Runner) SetSelectedIDs(ids []string) {
 	for _, id := range ids {
 		r.selectedIDs[id] = true
 	}
+}
+
+// SetSelectivePaths sets per-item path selections for selective strategy items.
+func (r *Runner) SetSelectivePaths(paths map[string][]string) {
+	r.selectivePaths = paths
+}
+
+// SetDryRun enables dry-run mode — paths are resolved but no files are written.
+func (r *Runner) SetDryRun(dryRun bool) {
+	r.dryRun = dryRun
 }
 
 // SetOnProgress registers a callback for progress events (used by GUI mode).
@@ -114,7 +129,7 @@ func (r *Runner) Run() RunResult {
 
 		// Validate source exists
 		if err := mapper.ValidateSourceExists(sourcePath, w.app.Name, w.item.Label); err != nil {
-			r.reportItem(w.app.Name, w.item.Label, sourcePath, targetPath, reporter.StatusSkipped, 0, err.Error())
+			r.reportItemFull(w.app.Name, w.item.Label, sourcePath, targetPath, reporter.StatusSkipped, 0, err.Error(), nil)
 			result.Items = append(result.Items, RunResultItem{
 				App: w.app.Name, Label: w.item.Label,
 				SourcePath: sourcePath, TargetPath: targetPath,
@@ -130,19 +145,44 @@ func (r *Runner) Run() RunResult {
 			continue
 		}
 
-		// Determine if source is a file or directory and copy accordingly
+		// Determine copy strategy
+		strategy := w.item.Strategy
+		if strategy == "" {
+			strategy = "mirror"
+		}
+
 		var bytesCopied int64
 		var copyErr error
+		var selectedPaths []string
 
-		info, _ := os.Stat(sourcePath)
-		if info.IsDir() {
-			bytesCopied, copyErr = copier.MirrorDir(sourcePath, targetPath)
+		if r.dryRun {
+			// Dry-run: estimate size without copying
+			bytesCopied, copyErr = estimateSize(sourcePath)
+		} else if strategy == "selective" {
+			itemID := w.app.Name + ":" + w.item.Label
+			selectedPaths = r.selectivePaths[itemID]
+			for _, p := range selectedPaths {
+				n, err := copier.CopyPath(p, filepath.Join(targetPath, filepath.Base(p)))
+				bytesCopied += n
+				if err != nil {
+					copyErr = err
+					break
+				}
+			}
 		} else {
-			bytesCopied, copyErr = copier.CopyFile(sourcePath, targetPath)
+			// mirror or file strategy
+			info, statErr := os.Stat(sourcePath)
+			if statErr != nil {
+				copyErr = statErr
+			} else if info.IsDir() {
+				bytesCopied, copyErr = copier.MirrorDir(sourcePath, targetPath)
+			} else {
+				bytesCopied, copyErr = copier.CopyFile(sourcePath, targetPath)
+			}
 		}
 
 		if copyErr != nil {
-			r.reportItem(w.app.Name, w.item.Label, sourcePath, targetPath, reporter.StatusFailed, 0, copyErr.Error())
+			r.reportItemFull(w.app.Name, w.item.Label, sourcePath, targetPath, reporter.StatusFailed, 0, copyErr.Error(), nil)
 			result.Items = append(result.Items, RunResultItem{
 				App: w.app.Name, Label: w.item.Label,
 				SourcePath: sourcePath, TargetPath: targetPath,
@@ -160,11 +200,12 @@ func (r *Runner) Run() RunResult {
 
 		// Success
 		result.TotalBytes += bytesCopied
-		r.reportItem(w.app.Name, w.item.Label, sourcePath, targetPath, reporter.StatusCopied, bytesCopied, "")
+		r.reportItemFull(w.app.Name, w.item.Label, sourcePath, targetPath, reporter.StatusCopied, bytesCopied, "", selectedPaths)
 		result.Items = append(result.Items, RunResultItem{
 			App: w.app.Name, Label: w.item.Label,
 			SourcePath: sourcePath, TargetPath: targetPath,
 			Status: reporter.StatusCopied, BytesCopied: bytesCopied,
+			SelectedPaths: selectedPaths,
 		})
 
 		r.emitProgress(ProgressEvent{
@@ -189,16 +230,33 @@ func (r *Runner) emitProgress(evt ProgressEvent) {
 	}
 }
 
-func (r *Runner) reportItem(app, label, source, target, status string, bytes int64, detail string) {
+func (r *Runner) reportItemFull(app, label, source, target, status string, bytes int64, detail string, selectedPaths []string) {
 	r.rep.Add(reporter.Result{
-		App:         app,
-		Label:       label,
-		SourcePath:  source,
-		TargetPath:  target,
-		Status:      status,
-		BytesCopied: bytes,
-		Detail:      detail,
+		App:           app,
+		Label:         label,
+		SourcePath:    source,
+		TargetPath:    target,
+		Status:        status,
+		BytesCopied:   bytes,
+		Detail:        detail,
+		SelectedPaths: selectedPaths,
 	})
+}
+
+func estimateSize(path string) (int64, error) {
+	var total int64
+	err := filepath.WalkDir(path, func(_ string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
+			return err
+		}
+		info, err := d.Info()
+		if err != nil {
+			return err
+		}
+		total += info.Size()
+		return nil
+	})
+	return total, err
 }
 
 func formatBytes(b int64) string {
