@@ -1,16 +1,35 @@
 <script>
   import CategoryAccordion from '../components/CategoryAccordion.svelte'
+  import PathBar from '../components/PathBar.svelte'
+  import PreflightPanel from '../components/PreflightPanel.svelte'
+  import { PreflightCheck } from '../../wailsjs/go/main/App'
 
   export let configView
-  export let backupRootValid = null
   export let onStart
   export let onOpenPicker = (item) => {}
   export let onProfileChange = () => {}
-  export let onRefreshBackup = () => {}
+  export let initialSourceRoot = ''
+  export let initialDestRoot = ''
 
   let selected = new Set()
   let profileValue = ''
   let dryRun = false
+
+  let sourceRoot = initialSourceRoot || (configView && configView.backupRoot) || ''
+  let destRoot = initialDestRoot
+
+  let preflightResult = null
+  let preflightDone = false
+  let runAnyway = false
+
+  function resetPreflight() {
+    preflightResult = null
+    preflightDone = false
+    runAnyway = false
+  }
+
+  // Reset preflight whenever paths or selections change
+  $: sourceRoot, destRoot, selected, resetPreflight()
 
   function loadProfile(e) {
     const profileName = e.target.value
@@ -36,11 +55,31 @@
     })
   }
 
+  async function handlePreflight() {
+    try {
+      preflightResult = await PreflightCheck([...selected], sourceRoot, destRoot)
+      preflightDone = true
+    } catch (e) {
+      console.error('Preflight failed:', e)
+    }
+  }
+
+  function handleRunAnyway(e) {
+    runAnyway = e.detail
+  }
+
   function handleStart() {
-    onStart([...selected], {}, dryRun)
+    onStart([...selected], {}, dryRun, sourceRoot, destRoot)
   }
 
   $: selectedCount = selected.size
+
+  $: startEnabled = selectedCount > 0 &&
+    preflightDone &&
+    preflightResult &&
+    preflightResult.sourceRootOK &&
+    preflightResult.destRootOK &&
+    (!preflightResult.hasItemWarnings || runAnyway)
 </script>
 
 <div class="selection-screen">
@@ -62,18 +101,13 @@
     </div>
   </header>
 
-  {#if backupRootValid === false}
-    <div class="backup-banner backup-missing">
-      <span class="backup-icon">&#9888;</span>
-      Backup not found: <code>{configView.backupRoot}</code> — mount the drive before starting.
-      <button class="refresh-btn" on:click={onRefreshBackup}>&#8635; Refresh</button>
-    </div>
-  {:else if backupRootValid === true}
-    <div class="backup-banner backup-ok">
-      <span class="backup-icon">&#10003;</span>
-      Backup: <code>{configView.backupRoot}</code>
-    </div>
-  {/if}
+  <PathBar
+    {sourceRoot}
+    {destRoot}
+    on:change={(e) => { sourceRoot = e.detail.sourceRoot; destRoot = e.detail.destRoot }}
+  />
+
+  <PreflightPanel result={preflightResult} on:runAnyway={handleRunAnyway} />
 
   <div class="content">
     {#each configView.categories as category}
@@ -83,13 +117,22 @@
 
   <footer>
     <span class="count">{selectedCount} item{selectedCount !== 1 ? 's' : ''} selected</span>
-    <button
-      class="start-btn"
-      disabled={selectedCount === 0}
-      on:click={handleStart}
-    >
-      Start Migration
-    </button>
+    <div class="footer-actions">
+      <button
+        class="preflight-btn"
+        disabled={selectedCount === 0}
+        on:click={handlePreflight}
+      >
+        Pre-flight Check
+      </button>
+      <button
+        class="start-btn"
+        disabled={!startEnabled}
+        on:click={handleStart}
+      >
+        Start Migration
+      </button>
+    </div>
   </footer>
 </div>
 
@@ -146,49 +189,6 @@
     font-size: 13px;
   }
 
-  .backup-banner {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 7px 20px;
-    font-size: 12px;
-    border-bottom: 1px solid #333;
-  }
-
-  .backup-ok {
-    background: #0d1f14;
-    color: #5cb85c;
-  }
-
-  .backup-missing {
-    background: #2a1500;
-    color: #d4a017;
-  }
-
-  .backup-icon {
-    font-size: 13px;
-  }
-
-  .backup-banner code {
-    font-family: 'Cascadia Code', 'Consolas', monospace;
-    font-size: 11px;
-    opacity: 0.85;
-  }
-
-  .refresh-btn {
-    margin-left: auto;
-    background: transparent;
-    color: #d4a017;
-    border: 1px solid #d4a017;
-    border-radius: 4px;
-    padding: 2px 8px;
-    font-size: 11px;
-    cursor: pointer;
-    opacity: 0.8;
-  }
-
-  .refresh-btn:hover { opacity: 1; }
-
   .content {
     flex: 1;
     overflow-y: auto;
@@ -207,6 +207,33 @@
   .count {
     font-size: 13px;
     color: #999;
+  }
+
+  .footer-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .preflight-btn {
+    background: transparent;
+    color: #d4a017;
+    border: 1px solid #d4a017;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .preflight-btn:hover:not(:disabled) {
+    background: rgba(212, 160, 23, 0.1);
+  }
+
+  .preflight-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
   }
 
   .start-btn {
