@@ -17,3 +17,7 @@ export function ListFolder(arg1) {
 export function StartMigration(arg1, arg2, arg3) {
   return window['go']['main']['App']['StartMigration'](arg1, arg2, arg3);
 }
+
+export function ValidateBackupRoot() {
+  return window['go']['main']['App']['ValidateBackupRoot']();
+}

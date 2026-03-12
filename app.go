@@ -94,6 +94,7 @@ func (a *App) GetConfig() (*ConfigView, error) {
 	}
 
 	return &ConfigView{
+		BackupRoot: cfg.BackupRoot,
 		Categories: categories,
 		Profiles:   profiles,
 	}, nil
@@ -217,6 +218,21 @@ func (a *App) ListFolder(path string) ([]FolderEntry, error) {
 		})
 	}
 	return result, nil
+}
+
+// ValidateBackupRoot checks whether the configured backup root directory exists.
+// Returns true if it exists and is accessible, false otherwise.
+func (a *App) ValidateBackupRoot() (bool, error) {
+	cfg, err := config.Load(a.configPath)
+	if err != nil {
+		return false, err
+	}
+	resolved := mapper.ResolvePath(cfg.BackupRoot)
+	info, err := os.Stat(resolved)
+	if err != nil {
+		return false, nil // not found — not an error, just absent
+	}
+	return info.IsDir(), nil
 }
 
 // GetSourcePath resolves the backup source path for a given item ID.

@@ -67,6 +67,7 @@ export namespace main {
 	    }
 	}
 	export class ConfigView {
+	    backupRoot: string;
 	    categories: CategoryView[];
 	    profiles: ProfileView[];
 	
@@ -76,6 +77,7 @@ export namespace main {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.backupRoot = source["backupRoot"];
 	        this.categories = this.convertValues(source["categories"], CategoryView);
 	        this.profiles = this.convertValues(source["profiles"], ProfileView);
 	    }

@@ -2,6 +2,7 @@ package main
 
 // ConfigView is the display model sent to the frontend.
 type ConfigView struct {
+	BackupRoot string        `json:"backupRoot"`
 	Categories []CategoryView `json:"categories"`
 	Profiles   []ProfileView  `json:"profiles"`
 }
