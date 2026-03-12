@@ -9,5 +9,17 @@
   "author": {
     "name": "Ktulue",
     "email": "ktulue.bot@gmail.com"
+  },
+  "info": {
+    "productName": "KtulueKit Migration",
+    "productVersion": "1.0.0",
+    "productIdentifier": "com.ktulue.ktuluekit-migration",
+    "copyright": "© 2026 Ktulue",
+    "comments": "Personal state restoration for a fresh Windows 11 install."
+  },
+  "windows": {
+    "webviewIsTransparent": false,
+    "windowIsTranslucent": false,
+    "disableWindowIcon": false
   }
 }
