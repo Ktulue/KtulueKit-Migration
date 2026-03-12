@@ -1,8 +1,11 @@
 <script>
+  import { createEventDispatcher } from 'svelte'
   import { BrowseForFolder } from '../../wailsjs/go/main/App'
 
   export let sourceRoot = ''
   export let destRoot = ''
+
+  const dispatch = createEventDispatcher()
 
   // icon states: 'blank' | 'unchecked' | 'ok' | 'error'
   let sourceIcon = 'unchecked'
@@ -13,9 +16,6 @@
     if (/^[A-Za-z]:$/.test(path)) return path + '\\'
     return path
   }
-
-  import { createEventDispatcher } from 'svelte'
-  const dispatch = createEventDispatcher()
 
   function emitChange() {
     dispatch('change', { sourceRoot, destRoot })
