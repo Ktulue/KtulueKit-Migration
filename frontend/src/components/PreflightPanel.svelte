@@ -8,7 +8,7 @@
   let expanded = true
   let runAnyway = false
 
-  $: if (result) { runAnyway = false }  // reset on new result
+  $: if (result) { runAnyway = false; expanded = true }  // reset on new result
 
   $: showRunAnyway = result &&
     result.sourceRootOK &&
@@ -36,7 +36,7 @@
         {/if}
       </span>
 
-      {#if result.items && result.items.length > 0}
+      {#if result.items && result.items.some(i => !i.found)}
         <button class="toggle-btn" on:click={() => expanded = !expanded}>
           {expanded ? '▲' : '▼'}
         </button>
