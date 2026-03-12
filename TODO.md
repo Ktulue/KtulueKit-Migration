@@ -74,14 +74,14 @@
 ---
 
 ## Phase 6 — Build & Manifest Contract
-- [ ] `wails build` produces `ktuluekit-migration.exe`
-- [ ] Exe runs standalone (no Go/Wails/Node on target)
-- [ ] Manifest format documented for KtulueKit-Cleanup dev
-- [ ] `.gitignore` confirmed to exclude `build/bin/`
+- [x] `wails build` produces `ktuluekit-migration.exe` (11 MB, `build/bin/`)
+- [ ] Exe runs standalone (no Go/Wails/Node on target) — verify on fresh W11
+- [x] Manifest format documented for KtulueKit-Cleanup dev (`docs/manifest-contract.md`)
+- [x] `.gitignore` confirmed to exclude `build/bin/`
 
 ---
 
 ## Handoff to KtulueKit-Cleanup
-- [ ] Manifest contract locked: `logs/manifest_<timestamp>.json`
-- [ ] Schema: version, runAt, items[]{app, label, sourcePath, targetPath, status, bytesCopied, selectedPaths}
-- [ ] Document contract in `docs/` before starting Cleanup dev
+- [x] Manifest contract locked: `logs/manifest_<timestamp>.json`
+- [x] Schema: version, runAt, items[]{app, label, sourcePath, targetPath, status, bytesCopied, selectedPaths}
+- [x] Document contract in `docs/manifest-contract.md`
