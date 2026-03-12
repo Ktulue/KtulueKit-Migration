@@ -119,6 +119,64 @@ export namespace main {
 	    }
 	}
 	
+	export class PreflightItem {
+	    id: string;
+	    label: string;
+	    path: string;
+	    found: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new PreflightItem(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.label = source["label"];
+	        this.path = source["path"];
+	        this.found = source["found"];
+	    }
+	}
+	export class PreflightResult {
+	    sourceRootOK: boolean;
+	    destRootOK: boolean;
+	    hasItemWarnings: boolean;
+	    items: PreflightItem[];
+	    readyCount: number;
+	    totalCount: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new PreflightResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sourceRootOK = source["sourceRootOK"];
+	        this.destRootOK = source["destRootOK"];
+	        this.hasItemWarnings = source["hasItemWarnings"];
+	        this.items = this.convertValues(source["items"], PreflightItem);
+	        this.readyCount = source["readyCount"];
+	        this.totalCount = source["totalCount"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 
 }
 
