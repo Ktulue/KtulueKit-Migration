@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "WebSearch",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(wails version:*)",
+      "Bash(cd \"F:/GDriveClone/Claude_Code/KtulueKit-Migration\" && go mod tidy 2>&1)",
+      "Bash(cd \"F:/GDriveClone/Claude_Code/KtulueKit-Migration/frontend\" && npm install 2>&1)",
+      "WebFetch(domain:docs.streamer.bot)",
+      "WebFetch(domain:obsproject.com)",
+      "WebFetch(domain:www.versluis.com)",
+      "Bash(cd /f/GDriveClone/Claude_Code/KtulueKit-Migration && go build ./... 2>&1)",
+      "Bash(npm run:*)",
+      "Bash(cd /f/GDriveClone/Claude_Code/KtulueKit-Migration && wails generate module 2>&1)",
+      "Bash(cd \"F:/GDriveClone/Claude_Code/KtulueKit-Migration\" && node -e \"\nconst fs = require\\('fs'\\);\nconst raw = fs.readFileSync\\('ktuluekit-migration.json', 'utf8'\\);\nconst data = JSON.parse\\(raw\\); // throws if invalid JSON\n\nconst apps = data.apps;\nconst allItems = [];\nfor \\(const app of apps\\) {\n  for \\(const item of app.items\\) {\n    allItems.push\\({ id: app.name + ':' + item.label, app: app.name, label: item.label, category: app.category, item }\\);\n  }\n}\n\nconsole.log\\('=== ALL APP ITEMS ==='\\);\nallItems.forEach\\(\\(x, i\\) => console.log\\(\\(i+1\\).toString\\(\\).padStart\\(2\\) + '. [' + x.category + '] ' + x.id\\)\\);\nconsole.log\\('\\\\nTotal app items:', allItems.length\\);\n\nconst fullRestore = data.profiles.find\\(p => p.name === 'Full Restore'\\);\nconsole.log\\('\\\\n=== FULL RESTORE PROFILE ==='\\);\nconsole.log\\('Count:', fullRestore.ids.length\\);\nconst allIds = new Set\\(allItems.map\\(x => x.id\\)\\);\nconst frIds = new Set\\(fullRestore.ids\\);\nconst missingFromFR = [...allIds].filter\\(x => !frIds.has\\(x\\)\\);\nconst extraInFR = [...frIds].filter\\(x => !allIds.has\\(x\\)\\);\nconsole.log\\('Missing from Full Restore:', missingFromFR\\);\nconsole.log\\('Extra in Full Restore \\(not in apps\\):', extraInFR\\);\n\nconst devTools = data.profiles.find\\(p => p.name === 'Dev Tools'\\);\nconsole.log\\('\\\\n=== DEV TOOLS PROFILE ==='\\);\nconsole.log\\('Count:', devTools.ids.length\\);\nconsole.log\\('IDs:', devTools.ids\\);\n\n// Check strategies\nconst personalFiles = apps.find\\(a => a.name === 'Personal Files'\\);\nconsole.log\\('\\\\n=== PERSONAL FILES STRATEGIES ==='\\);\nfor \\(const item of personalFiles.items\\) {\n  console.log\\(item.label + ': strategy=' + item.strategy\\);\n}\n\n// Check categories\nconst categories = {};\nfor \\(const app of apps\\) {\n  if \\(!categories[app.category]\\) categories[app.category] = [];\n  categories[app.category].push\\(app.name\\);\n}\nconsole.log\\('\\\\n=== CATEGORIES ==='\\);\nfor \\(const [cat, names] of Object.entries\\(categories\\)\\) {\n  console.log\\(cat + ': ' + names.join\\(', '\\)\\);\n}\n\nconsole.log\\('\\\\nJSON is VALID \\(no parse errors\\)'\\);\n\")",
+      "Bash(cd \"F:/GDriveClone/Claude_Code/KtulueKit-Migration\" && go test ./internal/copier/... -v -run TestCopyPath 2>&1)",
+      "Bash(cd \"F:/GDriveClone/Claude_Code/KtulueKit-Migration\" && go test ./internal/reporter/... -v 2>&1)",
+      "Bash(cd \"F:/GDriveClone/Claude_Code/KtulueKit-Migration\" && go test ./internal/runner/... -v 2>&1)",
+      "Bash(cd \"F:/GDriveClone/Claude_Code/KtulueKit-Migration\" && go test ./internal/... -v 2>&1)",
+      "Bash(cd \"F:/GDriveClone/Claude_Code/KtulueKit-Migration\" && go test ./internal/... 2>&1)",
+      "Bash(cd \"F:/GDriveClone/Claude_Code/KtulueKit-Migration\" && go build ./... 2>&1)",
+      "Bash(cd \"F:/GDriveClone/Claude_Code/KtulueKit-Migration\" && wails generate module 2>&1)",
+      "Bash(cd \"F:/GDriveClone/Claude_Code/KtulueKit-Migration\" && go vet ./... 2>&1)",
+      "Bash(cd \"F:/GDriveClone/Claude_Code/KtulueKit-Migration\" && go build ./... && go test ./internal/... && echo \"ALL GOOD\")",
+      "Bash(cd \"F:/GDriveClone/Claude_Code/KtulueKit-Migration\" && go test ./internal/... -v 2>&1 | tail -20)",
+      "Bash(cd \"F:/GDriveClone/Claude_Code/KtulueKit-Migration\" && go build ./... && echo \"Build clean\")",
+      "Bash(cd \"F:/GDriveClone/Claude_Code/KtulueKit-Migration\" && go test -v -run TestIntegration 2>&1)",
+      "Bash(cd \"F:/GDriveClone/Claude_Code/KtulueKit-Migration\" && wails build 2>&1)",
+      "Bash(cd \"F:/GDriveClone/Claude_Code/KtulueKit-Migration\" && go test ./... 2>&1)",
+      "Bash(cd \"F:/GDriveClone/Claude_Code/KtulueKit-Migration\" && go build ./... && go test ./... 2>&1)",
+      "Bash(cd \"F:/GDriveClone/Claude_Code/KtulueKit-Migration\" && python -c \"import json; d=json.load\\(open\\('ktuluekit-migration.json'\\)\\); [print\\(app['name'], '->', [i.get\\('target',''\\) for i in app['items']]\\) for app in d['apps'] if '%USERPROFILE%' in str\\(app\\)]\" 2>&1 || grep -i \"userprofile\" ktuluekit-migration.json)"
+    ]
+  }
+}
