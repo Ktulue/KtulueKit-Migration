@@ -4,6 +4,7 @@
   export let category
   export let selected
   export let onToggle
+  export let onOpenPicker = () => {}
 
   let open = true
 
@@ -15,7 +16,10 @@
     if (allChecked) {
       category.items.forEach(item => selected.delete(item.id))
     } else {
-      category.items.forEach(item => selected.add(item.id))
+      category.items.forEach(item => {
+        if (item.strategy === 'selective') return  // must use picker
+        selected.add(item.id)
+      })
     }
     onToggle()
   }
@@ -45,6 +49,7 @@
             }
             onToggle()
           }}
+          {onOpenPicker}
         />
       {/each}
     </div>

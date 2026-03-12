@@ -3,9 +3,11 @@
 
   export let configView
   export let onStart
+  export let onOpenPicker = (item) => {}
 
   let selected = new Set()
   let profileValue = ''
+  let dryRun = false
 
   function loadProfile(e) {
     const profileName = e.target.value
@@ -23,7 +25,7 @@
   }
 
   function handleStart() {
-    onStart([...selected])
+    onStart([...selected], {}, dryRun)
   }
 
   $: selectedCount = selected.size
@@ -35,6 +37,10 @@
       <h1>KtulueKit <span class="accent">Migration</span></h1>
     </div>
     <div class="header-right">
+      <label class="dry-run-label">
+        <input type="checkbox" bind:checked={dryRun} />
+        Dry run
+      </label>
       <select on:change={loadProfile} bind:value={profileValue}>
         <option value="">Load profile...</option>
         {#each configView.profiles as profile}
@@ -46,7 +52,7 @@
 
   <div class="content">
     {#each configView.categories as category}
-      <CategoryAccordion {category} {selected} onToggle={handleToggle} />
+      <CategoryAccordion {category} {selected} onToggle={handleToggle} {onOpenPicker} />
     {/each}
   </div>
 
@@ -88,6 +94,23 @@
   .accent {
     color: #2ea043;
   }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .dry-run-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #999;
+    cursor: pointer;
+  }
+
+  .dry-run-label input { accent-color: #d4a017; }
 
   select {
     background: #2a2a2a;

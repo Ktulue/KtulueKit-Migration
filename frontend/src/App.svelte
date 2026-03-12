@@ -3,7 +3,8 @@
   import SelectionScreen from './screens/SelectionScreen.svelte'
   import ProgressScreen from './screens/ProgressScreen.svelte'
   import SummaryScreen from './screens/SummaryScreen.svelte'
-  import { GetConfig, StartMigration } from '../wailsjs/go/main/App'
+  import FolderPicker from './components/FolderPicker.svelte'
+  import { GetConfig, StartMigration, GetSourcePath } from '../wailsjs/go/main/App'
   import { EventsOn } from '../wailsjs/runtime/runtime'
 
   let screen = 'selection' // 'selection' | 'progress' | 'summary'
@@ -11,6 +12,9 @@
   let configError = null
   let progressEvents = []
   let summaryResult = null
+  let selectivePaths = {}
+  let pickerItem = null
+  let pickerSourcePath = ''
 
   onMount(async () => {
     try {
@@ -29,15 +33,35 @@
     })
   })
 
-  async function handleStartMigration(selectedIDs) {
+  async function handleStartMigration(selectedIDs, userSelectivePaths, dryRun) {
     progressEvents = []
     screen = 'progress'
     try {
-      await StartMigration(selectedIDs)
+      await StartMigration(selectedIDs, { ...selectivePaths, ...userSelectivePaths }, dryRun)
     } catch (err) {
       summaryResult = { failed: [err.toString()], copied: [], skipped: [], manifest: [] }
       screen = 'summary'
     }
+  }
+
+  async function handleOpenPicker(item) {
+    try {
+      pickerSourcePath = await GetSourcePath(item.id)
+      pickerItem = item
+    } catch (err) {
+      console.error('Could not resolve source path for picker:', err)
+    }
+  }
+
+  function handlePickerConfirm(itemId, paths) {
+    selectivePaths = { ...selectivePaths, [itemId]: paths }
+    pickerItem = null
+    pickerSourcePath = ''
+  }
+
+  function handlePickerCancel() {
+    pickerItem = null
+    pickerSourcePath = ''
   }
 
   function handleClose() {
@@ -55,11 +79,21 @@
     <SelectionScreen
       {configView}
       onStart={handleStartMigration}
+      onOpenPicker={handleOpenPicker}
     />
   {:else if screen === 'progress'}
     <ProgressScreen events={progressEvents} />
   {:else if screen === 'summary' && summaryResult}
     <SummaryScreen result={summaryResult} onClose={handleClose} />
+  {/if}
+
+  {#if pickerItem}
+    <FolderPicker
+      sourcePath={pickerSourcePath}
+      itemId={pickerItem.id}
+      onConfirm={handlePickerConfirm}
+      onCancel={handlePickerCancel}
+    />
   {/if}
 </main>
 
