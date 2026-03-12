@@ -28,6 +28,14 @@
     selected = new Set(selected)
   }
 
+  // Wrap onOpenPicker to add the item to selected when picker is confirmed
+  function handleOpenPickerWrapped(item) {
+    onOpenPicker(item, (itemId) => {
+      selected.add(itemId)
+      handleToggle()
+    })
+  }
+
   function handleStart() {
     onStart([...selected], {}, dryRun)
   }
@@ -69,7 +77,7 @@
 
   <div class="content">
     {#each configView.categories as category}
-      <CategoryAccordion {category} {selected} onToggle={handleToggle} {onOpenPicker} />
+      <CategoryAccordion {category} {selected} onToggle={handleToggle} onOpenPicker={handleOpenPickerWrapped} />
     {/each}
   </div>
 

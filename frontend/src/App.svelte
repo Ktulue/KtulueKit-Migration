@@ -15,6 +15,7 @@
   let selectivePaths = {}
   let pickerItem = null
   let pickerSourcePath = ''
+  let pickerConfirmedCallback = null
   let dryRun = false
   let backupRootValid = null // null = checking, true = found, false = missing
 
@@ -48,22 +49,29 @@
     }
   }
 
-  async function handleOpenPicker(item) {
+  async function handleOpenPicker(item, onConfirmed) {
+    pickerConfirmedCallback = onConfirmed || null
     try {
       pickerSourcePath = await GetSourcePath(item.id)
       pickerItem = item
     } catch (err) {
       console.error('Could not resolve source path for picker:', err)
+      pickerConfirmedCallback = null
     }
   }
 
   function handlePickerConfirm(itemId, paths) {
     selectivePaths = { ...selectivePaths, [itemId]: paths }
+    if (pickerConfirmedCallback) {
+      pickerConfirmedCallback(itemId)
+      pickerConfirmedCallback = null
+    }
     pickerItem = null
     pickerSourcePath = ''
   }
 
   function handlePickerCancel() {
+    pickerConfirmedCallback = null
     pickerItem = null
     pickerSourcePath = ''
   }
