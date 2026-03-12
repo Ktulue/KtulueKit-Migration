@@ -5,6 +5,7 @@ export namespace main {
 	    name: string;
 	    description: string;
 	    notes: string;
+	    strategy: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new ItemView(source);
@@ -16,6 +17,7 @@ export namespace main {
 	        this.name = source["name"];
 	        this.description = source["description"];
 	        this.notes = source["notes"];
+	        this.strategy = source["strategy"];
 	    }
 	}
 	export class CategoryView {
@@ -95,6 +97,24 @@ export namespace main {
 		    }
 		    return a;
 		}
+	}
+	export class FolderEntry {
+	    name: string;
+	    path: string;
+	    isDir: boolean;
+	    size: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new FolderEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.path = source["path"];
+	        this.isDir = source["isDir"];
+	        this.size = source["size"];
+	    }
 	}
 	
 

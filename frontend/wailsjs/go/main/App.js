@@ -6,6 +6,14 @@ export function GetConfig() {
   return window['go']['main']['App']['GetConfig']();
 }
 
-export function StartMigration(arg1) {
-  return window['go']['main']['App']['StartMigration'](arg1);
+export function GetSourcePath(arg1) {
+  return window['go']['main']['App']['GetSourcePath'](arg1);
+}
+
+export function ListFolder(arg1) {
+  return window['go']['main']['App']['ListFolder'](arg1);
+}
+
+export function StartMigration(arg1, arg2, arg3) {
+  return window['go']['main']['App']['StartMigration'](arg1, arg2, arg3);
 }

@@ -4,4 +4,8 @@ import {main} from '../models';
 
 export function GetConfig():Promise<main.ConfigView>;
 
-export function StartMigration(arg1:Array<string>):Promise<void>;
+export function GetSourcePath(arg1:string):Promise<string>;
+
+export function ListFolder(arg1:string):Promise<Array<main.FolderEntry>>;
+
+export function StartMigration(arg1:Array<string>,arg2:Record<string, Array<string>>,arg3:boolean):Promise<void>;
