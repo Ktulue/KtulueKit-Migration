@@ -14,9 +14,8 @@
     <input
       type="checkbox"
       {checked}
-      on:change={(e) => {
-        if (isSelective && e.target.checked) {
-          e.preventDefault()
+      on:click|preventDefault={(e) => {
+        if (isSelective && !checked) {
           onOpenPicker(item)
         } else {
           onChange()
