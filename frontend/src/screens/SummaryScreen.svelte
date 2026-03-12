@@ -1,6 +1,7 @@
 <script>
   export let result
   export let onClose
+  export let manifestPath = ''
 
   let showManifest = false
 
@@ -90,11 +91,19 @@
   </div>
 
   <footer>
-    <div class="log-path">
-      {#if result.logPath}
-        <span class="log-label">Log:</span>
-        <span class="log-file">{result.logPath}</span>
-        <button class="copy-btn" on:click={copyLogPath}>Copy</button>
+    <div class="footer-info">
+      <div class="log-path">
+        {#if result.logPath}
+          <span class="log-label">Log:</span>
+          <span class="log-file">{result.logPath}</span>
+          <button class="copy-btn" on:click={copyLogPath}>Copy</button>
+        {/if}
+      </div>
+      {#if manifestPath}
+        <div class="log-path manifest-path-row">
+          <span class="log-label">Manifest:</span>
+          <span class="log-file">{manifestPath}</span>
+        </div>
       {/if}
     </div>
     <button class="close-btn" on:click={onClose}>Close</button>
@@ -109,53 +118,53 @@
   }
 
   header {
-    padding: 1rem 1.5rem;
+    padding: 12px 20px;
     background: #111;
     border-bottom: 1px solid #333;
   }
 
   h2 {
     margin: 0;
-    font-size: 1.2rem;
+    font-size: 18px;
     color: #e0e0e0;
   }
 
   .stats {
-    margin-top: 0.4rem;
-    font-size: 0.85rem;
+    margin-top: 6px;
+    font-size: 13px;
     color: #999;
   }
 
   .separator {
-    margin: 0 0.5rem;
+    margin: 0 8px;
     color: #555;
   }
 
   .content {
     flex: 1;
     overflow-y: auto;
-    padding: 1rem 1.5rem;
+    padding: 20px;
   }
 
   .section {
-    margin-bottom: 1.2rem;
+    margin-bottom: 20px;
   }
 
   h3 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1rem;
+    margin: 0 0 8px 0;
+    font-size: 14px;
     color: #ccc;
   }
 
   .item {
-    padding: 0.3rem 0 0.3rem 1.5rem;
-    font-size: 0.9rem;
+    padding: 5px 0 5px 24px;
+    font-size: 13px;
     color: #aaa;
     border-bottom: 1px solid #222;
   }
 
   .manifest-toggle {
-    margin: 1rem 0;
+    margin: 16px 0;
   }
 
   .manifest-btn {
@@ -163,8 +172,8 @@
     color: #2ea043;
     border: 1px solid #2ea043;
     border-radius: 4px;
-    padding: 0.4rem 1rem;
-    font-size: 0.85rem;
+    padding: 6px 16px;
+    font-size: 13px;
     cursor: pointer;
   }
 
@@ -174,32 +183,32 @@
 
   .manifest {
     overflow-x: auto;
-    margin-top: 0.5rem;
+    margin-top: 8px;
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.8rem;
+    font-size: 12px;
   }
 
   th {
     text-align: left;
-    padding: 0.5rem;
+    padding: 8px;
     background: #222;
     color: #999;
     border-bottom: 1px solid #333;
   }
 
   td {
-    padding: 0.4rem 0.5rem;
+    padding: 6px 8px;
     border-bottom: 1px solid #222;
     color: #bbb;
   }
 
   .path {
     font-family: 'Cascadia Code', 'Consolas', monospace;
-    font-size: 0.75rem;
+    font-size: 12px;
     color: #888;
     max-width: 250px;
     overflow: hidden;
@@ -215,16 +224,22 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 1.5rem;
+    padding: 12px 20px;
     background: #111;
     border-top: 1px solid #333;
+  }
+
+  .footer-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
 
   .log-path {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 0.8rem;
+    gap: 8px;
+    font-size: 12px;
   }
 
   .log-label {
@@ -241,8 +256,8 @@
     color: #999;
     border: 1px solid #444;
     border-radius: 4px;
-    padding: 0.2rem 0.6rem;
-    font-size: 0.75rem;
+    padding: 3px 8px;
+    font-size: 12px;
     cursor: pointer;
   }
 
@@ -256,8 +271,8 @@
     color: #fff;
     border: none;
     border-radius: 6px;
-    padding: 0.6rem 1.5rem;
-    font-size: 0.95rem;
+    padding: 8px 20px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
   }

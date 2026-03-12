@@ -15,6 +15,7 @@
   let selectivePaths = {}
   let pickerItem = null
   let pickerSourcePath = ''
+  let dryRun = false
 
   onMount(async () => {
     try {
@@ -33,11 +34,12 @@
     })
   })
 
-  async function handleStartMigration(selectedIDs, userSelectivePaths, dryRun) {
+  async function handleStartMigration(selectedIDs, userSelectivePaths, isDryRun) {
+    dryRun = isDryRun
     progressEvents = []
     screen = 'progress'
     try {
-      await StartMigration(selectedIDs, { ...selectivePaths, ...userSelectivePaths }, dryRun)
+      await StartMigration(selectedIDs, { ...selectivePaths, ...userSelectivePaths }, isDryRun)
     } catch (err) {
       summaryResult = { failed: [err.toString()], copied: [], skipped: [], manifest: [] }
       screen = 'summary'
@@ -82,9 +84,9 @@
       onOpenPicker={handleOpenPicker}
     />
   {:else if screen === 'progress'}
-    <ProgressScreen events={progressEvents} />
+    <ProgressScreen events={progressEvents} {dryRun} />
   {:else if screen === 'summary' && summaryResult}
-    <SummaryScreen result={summaryResult} onClose={handleClose} />
+    <SummaryScreen result={summaryResult} onClose={handleClose} manifestPath={summaryResult.manifestPath || ''} />
   {/if}
 
   {#if pickerItem}

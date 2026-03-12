@@ -79,14 +79,14 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 1.5rem;
+    padding: 12px 20px;
     background: #111;
     border-bottom: 1px solid #333;
   }
 
   h1 {
     margin: 0;
-    font-size: 1.3rem;
+    font-size: 20px;
     font-weight: 600;
     color: #e0e0e0;
   }
@@ -98,7 +98,7 @@
   .header-right {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 16px;
   }
 
   .dry-run-label {
@@ -117,27 +117,27 @@
     color: #e0e0e0;
     border: 1px solid #444;
     border-radius: 4px;
-    padding: 0.4rem 0.6rem;
-    font-size: 0.85rem;
+    padding: 6px 10px;
+    font-size: 13px;
   }
 
   .content {
     flex: 1;
     overflow-y: auto;
-    padding: 0.5rem 1.5rem;
+    padding: 12px 20px;
   }
 
   footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 1.5rem;
+    padding: 12px 20px;
     background: #111;
     border-top: 1px solid #333;
   }
 
   .count {
-    font-size: 0.9rem;
+    font-size: 13px;
     color: #999;
   }
 
@@ -146,8 +146,8 @@
     color: #fff;
     border: none;
     border-radius: 6px;
-    padding: 0.6rem 1.5rem;
-    font-size: 0.95rem;
+    padding: 8px 20px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.15s;
