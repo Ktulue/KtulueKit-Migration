@@ -3,10 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 	"sort"
 	"sync"
+	"time"
 
 	"github.com/Ktulue/KtulueKit-Migration/internal/config"
+	"github.com/Ktulue/KtulueKit-Migration/internal/mapper"
 	"github.com/Ktulue/KtulueKit-Migration/internal/reporter"
 	"github.com/Ktulue/KtulueKit-Migration/internal/runner"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -49,6 +53,7 @@ func (a *App) GetConfig() (*ConfigView, error) {
 				Name:        app.Name + " — " + item.Label,
 				Description: item.Description,
 				Notes:       item.Notes,
+				Strategy:    item.Strategy,
 			}
 			catMap[app.Category] = append(catMap[app.Category], iv)
 		}
@@ -97,7 +102,7 @@ func (a *App) GetConfig() (*ConfigView, error) {
 
 // StartMigration validates selections and kicks off the migration in a goroutine.
 // Progress events are emitted to the frontend via Wails runtime events.
-func (a *App) StartMigration(selectedIDs []string) error {
+func (a *App) StartMigration(selectedIDs []string, selectivePaths map[string][]string, dryRun bool) error {
 	if len(selectedIDs) == 0 {
 		return fmt.Errorf("no items selected")
 	}
@@ -125,24 +130,42 @@ func (a *App) StartMigration(selectedIDs []string) error {
 			return
 		}
 
-		rep := reporter.New("logs")
+		var rep *reporter.Reporter
+		if dryRun {
+			rep = reporter.NewNull()
+		} else {
+			rep = reporter.New("logs")
+		}
 
 		r := runner.New(cfg, rep)
 		r.SetSelectedIDs(selectedIDs)
+		r.SetSelectivePaths(selectivePaths)
+		r.SetDryRun(dryRun)
 		r.SetOnProgress(func(evt runner.ProgressEvent) {
 			runtime.EventsEmit(a.ctx, "progress", evt)
 		})
 
 		result := r.Run()
 
+		var manifestPath string
+		if !dryRun {
+			ts := time.Now().Format("2006-01-02_15-04-05")
+			manifestPath = filepath.Join("logs", fmt.Sprintf("manifest_%s.json", ts))
+			if err := rep.WriteManifest(manifestPath); err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: could not write manifest: %v\n", err)
+				manifestPath = ""
+			}
+		}
+
 		runtime.EventsEmit(a.ctx, "complete", SummaryResult{
-			Copied:   rep.NamesBy(reporter.StatusCopied),
-			Skipped:  rep.NamesBy(reporter.StatusSkipped),
-			Failed:   rep.NamesBy(reporter.StatusFailed),
-			Bytes:    result.TotalBytes,
-			Elapsed:  result.Elapsed.String(),
-			LogPath:  rep.LogPath(),
-			Manifest: buildManifest(result),
+			Copied:       rep.NamesBy(reporter.StatusCopied),
+			Skipped:      rep.NamesBy(reporter.StatusSkipped),
+			Failed:       rep.NamesBy(reporter.StatusFailed),
+			Bytes:        result.TotalBytes,
+			Elapsed:      result.Elapsed.String(),
+			LogPath:      rep.LogPath(),
+			ManifestPath: manifestPath,
+			Manifest:     buildManifest(result),
 		})
 	}()
 
@@ -153,14 +176,63 @@ func (a *App) StartMigration(selectedIDs []string) error {
 func buildManifest(result runner.RunResult) []ManifestEntry {
 	var entries []ManifestEntry
 	for _, r := range result.Items {
+		sp := r.SelectedPaths
+		if sp == nil {
+			sp = []string{}
+		}
 		entries = append(entries, ManifestEntry{
-			App:         r.App,
-			Label:       r.Label,
-			SourcePath:  r.SourcePath,
-			TargetPath:  r.TargetPath,
-			Status:      r.Status,
-			BytesCopied: r.BytesCopied,
+			App:           r.App,
+			Label:         r.Label,
+			SourcePath:    r.SourcePath,
+			TargetPath:    r.TargetPath,
+			Status:        r.Status,
+			BytesCopied:   r.BytesCopied,
+			SelectedPaths: sp,
 		})
 	}
 	return entries
+}
+
+// ListFolder returns the immediate contents of the directory at path.
+// Used by the frontend FolderPicker component.
+func (a *App) ListFolder(path string) ([]FolderEntry, error) {
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		return nil, fmt.Errorf("reading folder: %w", err)
+	}
+	result := make([]FolderEntry, 0, len(entries))
+	for _, e := range entries {
+		info, err := e.Info()
+		if err != nil {
+			continue
+		}
+		var size int64
+		if !e.IsDir() {
+			size = info.Size()
+		}
+		result = append(result, FolderEntry{
+			Name:  e.Name(),
+			Path:  filepath.Join(path, e.Name()),
+			IsDir: e.IsDir(),
+			Size:  size,
+		})
+	}
+	return result, nil
+}
+
+// GetSourcePath resolves the backup source path for a given item ID.
+// Used by the frontend FolderPicker to list folder contents.
+func (a *App) GetSourcePath(itemID string) (string, error) {
+	cfg, err := config.Load(a.configPath)
+	if err != nil {
+		return "", err
+	}
+	for _, app := range cfg.Apps {
+		for _, item := range app.Items {
+			if app.Name+":"+item.Label == itemID {
+				return mapper.BuildSourcePath(cfg.BackupRoot, item.Source), nil
+			}
+		}
+	}
+	return "", fmt.Errorf("item not found: %s", itemID)
 }
