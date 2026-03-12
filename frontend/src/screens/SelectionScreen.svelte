@@ -6,6 +6,7 @@
   export let onStart
   export let onOpenPicker = (item) => {}
   export let onProfileChange = () => {}
+  export let onRefreshBackup = () => {}
 
   let selected = new Set()
   let profileValue = ''
@@ -57,6 +58,7 @@
     <div class="backup-banner backup-missing">
       <span class="backup-icon">&#9888;</span>
       Backup not found: <code>{configView.backupRoot}</code> — mount the drive before starting.
+      <button class="refresh-btn" on:click={onRefreshBackup}>&#8635; Refresh</button>
     </div>
   {:else if backupRootValid === true}
     <div class="backup-banner backup-ok">
@@ -164,6 +166,20 @@
     font-size: 11px;
     opacity: 0.85;
   }
+
+  .refresh-btn {
+    margin-left: auto;
+    background: transparent;
+    color: #d4a017;
+    border: 1px solid #d4a017;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 11px;
+    cursor: pointer;
+    opacity: 0.8;
+  }
+
+  .refresh-btn:hover { opacity: 1; }
 
   .content {
     flex: 1;

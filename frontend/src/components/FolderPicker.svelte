@@ -39,6 +39,10 @@
     onConfirm(itemId, [...selected])
   }
 
+  function handleKeydown(e) {
+    if (e.key === 'Escape') onCancel()
+  }
+
   function formatSize(bytes) {
     if (bytes === 0) return '—'
     if (bytes < 1024) return `${bytes} B`
@@ -46,6 +50,8 @@
     return `${(bytes/1048576).toFixed(1)} MB`
   }
 </script>
+
+<svelte:window on:keydown={handleKeydown} />
 
 <div class="overlay">
   <div class="modal">

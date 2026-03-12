@@ -72,6 +72,12 @@
     selectivePaths = {}
   }
 
+  async function handleRefreshBackup() {
+    try {
+      backupRootValid = await ValidateBackupRoot()
+    } catch (_) {}
+  }
+
   function handleClose() {
     Quit()
   }
@@ -90,6 +96,7 @@
       onStart={handleStartMigration}
       onOpenPicker={handleOpenPicker}
       onProfileChange={handleProfileChange}
+      onRefreshBackup={handleRefreshBackup}
     />
   {:else if screen === 'progress'}
     <ProgressScreen events={progressEvents} {dryRun} />
