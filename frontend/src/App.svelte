@@ -4,7 +4,7 @@
   import ProgressScreen from './screens/ProgressScreen.svelte'
   import SummaryScreen from './screens/SummaryScreen.svelte'
   import FolderPicker from './components/FolderPicker.svelte'
-  import { GetConfig, StartMigration, GetSourcePath, ValidateBackupRoot } from '../wailsjs/go/main/App'
+  import { GetConfig, StartMigration, GetSourcePath } from '../wailsjs/go/main/App'
   import { EventsOn, Quit } from '../wailsjs/runtime/runtime'
 
   let screen = 'selection' // 'selection' | 'progress' | 'summary'
@@ -17,12 +17,12 @@
   let pickerSourcePath = ''
   let pickerConfirmedCallback = null
   let dryRun = false
-  let backupRootValid = null // null = checking, true = found, false = missing
+  let pendingSourceRoot = ''
+  let pendingDestRoot = ''
 
   onMount(async () => {
     try {
       configView = await GetConfig()
-      backupRootValid = await ValidateBackupRoot()
     } catch (err) {
       configError = err
     }
@@ -37,12 +37,12 @@
     })
   })
 
-  async function handleStartMigration(selectedIDs, userSelectivePaths, isDryRun) {
+  async function handleStartMigration(selectedIDs, userSelectivePaths, isDryRun, sourceRoot, destRoot) {
     dryRun = isDryRun
     progressEvents = []
     screen = 'progress'
     try {
-      await StartMigration(selectedIDs, { ...selectivePaths, ...userSelectivePaths }, isDryRun)
+      await StartMigration(selectedIDs, { ...selectivePaths, ...userSelectivePaths }, isDryRun, sourceRoot || '', destRoot || '')
     } catch (err) {
       summaryResult = { failed: [err.toString()], copied: [], skipped: [], manifest: [] }
       screen = 'summary'
@@ -80,13 +80,9 @@
     selectivePaths = {}
   }
 
-  async function handleRefreshBackup() {
-    try {
-      backupRootValid = await ValidateBackupRoot()
-    } catch (_) {}
-  }
-
   function handleRunAgain() {
+    pendingSourceRoot = summaryResult?.sourceRootOverride ?? ''
+    pendingDestRoot = summaryResult?.destRootOverride ?? ''
     summaryResult = null
     progressEvents = []
     screen = 'selection'
@@ -106,11 +102,11 @@
   {:else if screen === 'selection' && configView}
     <SelectionScreen
       {configView}
-      {backupRootValid}
+      initialSourceRoot={pendingSourceRoot}
+      initialDestRoot={pendingDestRoot}
       onStart={handleStartMigration}
       onOpenPicker={handleOpenPicker}
       onProfileChange={handleProfileChange}
-      onRefreshBackup={handleRefreshBackup}
     />
   {:else if screen === 'progress'}
     <ProgressScreen events={progressEvents} {dryRun} />
