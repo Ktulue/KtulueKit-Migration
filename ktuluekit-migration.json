@@ -18,7 +18,7 @@
           "source": "obs-studio/basic",
           "target": "%APPDATA%/obs-studio/basic",
           "description": "Scene collections and profile configurations",
-          "notes": "Includes all scene JSON files and profile settings"
+          "notes": "Close OBS before backing up to avoid file locks. Scenes stored as JSON in %APPDATA%/obs-studio/basic/scenes/"
         },
         {
           "label": "plugin configs",
@@ -37,7 +37,7 @@
           "source": "streamerbot/data",
           "target": "%APPDATA%/Streamer.bot/data",
           "description": "Actions, commands, and automation database",
-          "notes": "Contains the .db file and action exports"
+          "notes": "Close Streamer.bot before backing up to avoid SQLite file locks on .db files"
         },
         {
           "label": "settings",
@@ -101,6 +101,254 @@
           "description": "PowerShell profile with oh-my-posh theme configuration"
         }
       ]
+    },
+    {
+      "name": "LurkBait Twitch Fishing",
+      "category": "Games",
+      "items": [
+        {
+          "label": "save data & custom catches",
+          "source": "lurkbait",
+          "target": "%USERPROFILE%/AppData/LocalLow/BLAMCAM Interactive/LurkBait Twitch Fishing",
+          "description": "Save data, Twitch connection config, and custom catch images/GIFs",
+          "notes": "Includes CatchData, PlayerData, DexData, AppPreferences, connection BINs, and the CustomCatches image folder"
+        }
+      ]
+    },
+    {
+      "name": "Git",
+      "category": "Dev Tools",
+      "items": [
+        {
+          "label": "global config",
+          "source": "git/.gitconfig",
+          "target": "%USERPROFILE%/.gitconfig",
+          "description": "Global git identity, aliases, and default branch settings"
+        }
+      ]
+    },
+    {
+      "name": "SSH",
+      "category": "Dev Tools",
+      "items": [
+        {
+          "label": "keys & config",
+          "source": "ssh",
+          "target": "%USERPROFILE%/.ssh",
+          "description": "SSH keys and config for GitHub and remote connections",
+          "notes": "Restore file permissions after copy: id_rsa should be 600"
+        }
+      ]
+    },
+    {
+      "name": "VS Code",
+      "category": "Dev Tools",
+      "items": [
+        {
+          "label": "settings & keybindings",
+          "source": "vscode/User",
+          "target": "%APPDATA%/Code/User",
+          "description": "VS Code settings.json, keybindings.json, and snippets"
+        }
+      ]
+    },
+    {
+      "name": "Windows Terminal",
+      "category": "Dev Tools",
+      "items": [
+        {
+          "label": "settings",
+          "source": "terminal/settings.json",
+          "target": "%LOCALAPPDATA%/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json",
+          "description": "Terminal profiles, color schemes, and keybindings",
+          "notes": "Applies only when Terminal is installed via Microsoft Store or WinGet"
+        }
+      ]
+    },
+    {
+      "name": "GIMP",
+      "category": "Creative Suite",
+      "items": [
+        {
+          "label": "brushes & settings",
+          "source": "gimp",
+          "target": "%APPDATA%/GIMP",
+          "description": "GIMP user settings, brushes, and presets"
+        }
+      ]
+    },
+    {
+      "name": "Krita",
+      "category": "Creative Suite",
+      "items": [
+        {
+          "label": "brushes & settings",
+          "source": "krita",
+          "target": "%APPDATA%/krita",
+          "description": "Krita user settings and brush presets"
+        }
+      ]
+    },
+    {
+      "name": "Audacity",
+      "category": "Creative Suite",
+      "items": [
+        {
+          "label": "settings",
+          "source": "audacity",
+          "target": "%APPDATA%/audacity",
+          "description": "Audacity preferences and EQ presets"
+        }
+      ]
+    },
+    {
+      "name": "Blender",
+      "category": "Creative Suite",
+      "items": [
+        {
+          "label": "preferences & addons",
+          "source": "blender",
+          "target": "%APPDATA%/Blender Foundation",
+          "description": "Blender user preferences, themes, and installed addons"
+        }
+      ]
+    },
+    {
+      "name": "Aseprite",
+      "category": "Creative Suite",
+      "items": [
+        {
+          "label": "settings",
+          "source": "aseprite",
+          "target": "%APPDATA%/Aseprite",
+          "description": "Aseprite user settings and palettes"
+        }
+      ]
+    },
+    {
+      "name": "Kdenlive",
+      "category": "Creative Suite",
+      "items": [
+        {
+          "label": "settings",
+          "source": "kdenlive",
+          "target": "%APPDATA%/kdenlive",
+          "description": "Kdenlive user settings and render profiles"
+        }
+      ]
+    },
+    {
+      "name": "DaVinci Resolve",
+      "category": "Creative Suite",
+      "items": [
+        {
+          "label": "project library",
+          "source": "resolve",
+          "target": "%USERPROFILE%/Documents/DaVinci Resolve",
+          "description": "DaVinci Resolve project database and settings"
+        }
+      ]
+    },
+    {
+      "name": "ShareX",
+      "category": "Utilities",
+      "items": [
+        {
+          "label": "settings & screenshots",
+          "source": "sharex",
+          "target": "%APPDATA%/ShareX",
+          "description": "ShareX application settings and screenshot library"
+        }
+      ]
+    },
+    {
+      "name": "PowerToys",
+      "category": "Utilities",
+      "items": [
+        {
+          "label": "settings",
+          "source": "powertoys",
+          "target": "%LOCALAPPDATA%/Microsoft/PowerToys",
+          "description": "PowerToys module settings and keybindings"
+        }
+      ]
+    },
+    {
+      "name": "Claude Desktop",
+      "category": "Utilities",
+      "items": [
+        {
+          "label": "MCP config",
+          "source": "claude-desktop",
+          "target": "%APPDATA%/Claude",
+          "description": "Claude Desktop MCP server configuration"
+        }
+      ]
+    },
+    {
+      "name": "Discord",
+      "category": "Communication",
+      "items": [
+        {
+          "label": "local settings",
+          "source": "discord",
+          "target": "%APPDATA%/discord",
+          "description": "Discord local user settings and keybindings"
+        }
+      ]
+    },
+    {
+      "name": "Spotify",
+      "category": "Communication",
+      "items": [
+        {
+          "label": "local files",
+          "source": "spotify",
+          "target": "%LOCALAPPDATA%/Spotify",
+          "description": "Spotify local cache and downloaded files"
+        }
+      ]
+    },
+    {
+      "name": "Personal Files",
+      "category": "Personal Files",
+      "items": [
+        {
+          "label": "Desktop",
+          "source": "personal/Desktop",
+          "target": "%USERPROFILE%/Desktop",
+          "description": "All files and folders stored on the Desktop",
+          "strategy": "mirror"
+        },
+        {
+          "label": "Documents",
+          "source": "personal/Documents",
+          "target": "%USERPROFILE%/Documents",
+          "description": "Documents folder — select specific items via folder picker",
+          "strategy": "selective"
+        },
+        {
+          "label": "Videos",
+          "source": "personal/Videos",
+          "target": "%USERPROFILE%/Videos",
+          "description": "Videos folder — select specific items via folder picker",
+          "strategy": "selective"
+        },
+        {
+          "label": "Pictures",
+          "source": "personal/Pictures",
+          "target": "%USERPROFILE%/Pictures",
+          "description": "Pictures folder — select specific items via folder picker",
+          "strategy": "selective"
+        },
+        {
+          "label": "Music",
+          "source": "personal/Music",
+          "target": "%USERPROFILE%/Music",
+          "description": "Music folder — select specific items via folder picker",
+          "strategy": "selective"
+        }
+      ]
     }
   ],
   "profiles": [
@@ -115,7 +363,29 @@
         "Brave Browser:user profile",
         "Brave Browser:local state",
         "GIFs & Media Assets:stream media",
-        "PowerShell:profile (oh-my-posh)"
+        "PowerShell:profile (oh-my-posh)",
+        "LurkBait Twitch Fishing:save data & custom catches",
+        "Git:global config",
+        "SSH:keys & config",
+        "VS Code:settings & keybindings",
+        "Windows Terminal:settings",
+        "GIMP:brushes & settings",
+        "Krita:brushes & settings",
+        "Audacity:settings",
+        "Blender:preferences & addons",
+        "Aseprite:settings",
+        "Kdenlive:settings",
+        "DaVinci Resolve:project library",
+        "ShareX:settings & screenshots",
+        "PowerToys:settings",
+        "Claude Desktop:MCP config",
+        "Discord:local settings",
+        "Spotify:local files",
+        "Personal Files:Desktop",
+        "Personal Files:Documents",
+        "Personal Files:Videos",
+        "Personal Files:Pictures",
+        "Personal Files:Music"
       ]
     },
     {
@@ -135,6 +405,15 @@
         "Brave Browser:user profile",
         "Brave Browser:local state",
         "PowerShell:profile (oh-my-posh)"
+      ]
+    },
+    {
+      "name": "Dev Tools",
+      "ids": [
+        "Git:global config",
+        "SSH:keys & config",
+        "VS Code:settings & keybindings",
+        "Windows Terminal:settings"
       ]
     }
   ]
