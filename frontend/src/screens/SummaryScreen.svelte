@@ -1,6 +1,7 @@
 <script>
   export let result
   export let onClose
+  export let onRunAgain = null
   export let manifestPath = ''
 
   let showManifest = false
@@ -113,7 +114,12 @@
         </div>
       {/if}
     </div>
-    <button class="close-btn" on:click={onClose}>Close</button>
+    <div class="footer-actions">
+      {#if onRunAgain}
+        <button class="run-again-btn" on:click={onRunAgain}>Run Again</button>
+      {/if}
+      <button class="close-btn" on:click={onClose}>Close</button>
+    </div>
   </footer>
 </div>
 
@@ -269,6 +275,27 @@
   }
 
   .copy-btn:hover {
+    color: #e0e0e0;
+    border-color: #666;
+  }
+
+  .footer-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .run-again-btn {
+    background: transparent;
+    color: #999;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 8px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .run-again-btn:hover {
     color: #e0e0e0;
     border-color: #666;
   }

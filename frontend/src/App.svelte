@@ -78,6 +78,12 @@
     } catch (_) {}
   }
 
+  function handleRunAgain() {
+    summaryResult = null
+    progressEvents = []
+    screen = 'selection'
+  }
+
   function handleClose() {
     Quit()
   }
@@ -101,7 +107,7 @@
   {:else if screen === 'progress'}
     <ProgressScreen events={progressEvents} {dryRun} />
   {:else if screen === 'summary' && summaryResult}
-    <SummaryScreen result={summaryResult} onClose={handleClose} manifestPath={summaryResult.manifestPath || ''} />
+    <SummaryScreen result={summaryResult} onClose={handleClose} onRunAgain={handleRunAgain} manifestPath={summaryResult.manifestPath || ''} />
   {/if}
 
   {#if pickerItem}
