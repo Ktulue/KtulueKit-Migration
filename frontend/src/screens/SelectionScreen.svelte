@@ -29,7 +29,10 @@
   }
 
   // Reset preflight whenever paths or selections change
-  $: sourceRoot, destRoot, selected, resetPreflight()
+  $: {
+    sourceRoot; destRoot; selected;
+    resetPreflight()
+  }
 
   function loadProfile(e) {
     const profileName = e.target.value
@@ -60,6 +63,7 @@
       preflightResult = await PreflightCheck([...selected], sourceRoot, destRoot)
       preflightDone = true
     } catch (e) {
+      preflightDone = false
       console.error('Preflight failed:', e)
     }
   }
