@@ -46,12 +46,13 @@ type RunResult struct {
 
 // Runner orchestrates the migration process.
 type Runner struct {
-	cfg            *config.Config
-	rep            *reporter.Reporter
-	selectedIDs    map[string]bool
-	selectivePaths map[string][]string
-	dryRun         bool
-	onProgress     func(ProgressEvent)
+	cfg              *config.Config
+	rep              *reporter.Reporter
+	selectedIDs      map[string]bool
+	selectivePaths   map[string][]string
+	dryRun           bool
+	onProgress       func(ProgressEvent)
+	destRootOverride string
 }
 
 // New creates a Runner with the given config and reporter.
@@ -83,6 +84,11 @@ func (r *Runner) SetDryRun(dryRun bool) {
 // SetOnProgress registers a callback for progress events (used by GUI mode).
 func (r *Runner) SetOnProgress(fn func(ProgressEvent)) {
 	r.onProgress = fn
+}
+
+// SetDestRootOverride sets a runtime destination root override applied to all target paths.
+func (r *Runner) SetDestRootOverride(override string) {
+	r.destRootOverride = override
 }
 
 // Run executes the migration. It iterates through all selected items,
@@ -125,7 +131,32 @@ func (r *Runner) Run() RunResult {
 
 		// Resolve source and target paths
 		sourcePath := mapper.BuildSourcePath(r.cfg.BackupRoot, w.item.Source)
-		targetPath := mapper.BuildTargetPath(w.item.Target)
+
+		// resolvedTarget is the fully env-var-expanded absolute path from the config.
+		// If env-var expansion succeeded, it will match X:\ on Windows.
+		// If it doesn't (e.g. unexpanded %UNKNOWN_VAR%), we treat it as invalid.
+		resolvedTarget := mapper.BuildTargetPath(w.item.Target)
+
+		// Guard: if a dest override is active and the resolved target has no drive prefix,
+		// log as failed and skip — do not copy to a garbage path.
+		if r.destRootOverride != "" {
+			if len(resolvedTarget) < 3 || resolvedTarget[1] != ':' || resolvedTarget[2] != '\\' {
+				r.reportItemFull(w.app.Name, w.item.Label, sourcePath, resolvedTarget, reporter.StatusFailed, 0, "target path has no drive prefix", nil)
+				result.Items = append(result.Items, RunResultItem{
+					App: w.app.Name, Label: w.item.Label,
+					SourcePath: sourcePath, TargetPath: resolvedTarget,
+					Status: reporter.StatusFailed,
+				})
+				r.emitProgress(ProgressEvent{
+					Index: i + 1, Total: total,
+					App: w.app.Name, Label: w.item.Label,
+					Status: "failed", Detail: "target path has no drive prefix",
+					Elapsed: time.Since(start).Round(time.Second).String(),
+				})
+				continue
+			}
+		}
+		targetPath := mapper.ApplyDestOverride(resolvedTarget, r.destRootOverride)
 
 		// Validate source exists
 		if err := mapper.ValidateSourceExists(sourcePath, w.app.Name, w.item.Label); err != nil {

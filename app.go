@@ -103,7 +103,7 @@ func (a *App) GetConfig() (*ConfigView, error) {
 
 // StartMigration validates selections and kicks off the migration in a goroutine.
 // Progress events are emitted to the frontend via Wails runtime events.
-func (a *App) StartMigration(selectedIDs []string, selectivePaths map[string][]string, dryRun bool) error {
+func (a *App) StartMigration(selectedIDs []string, selectivePaths map[string][]string, dryRun bool, sourceRootOverride string, destRootOverride string) error {
 	if len(selectedIDs) == 0 {
 		return fmt.Errorf("no items selected")
 	}
@@ -115,6 +115,10 @@ func (a *App) StartMigration(selectedIDs []string, selectivePaths map[string][]s
 	}
 	a.running = true
 	a.mu.Unlock()
+
+	// Capture overrides into locals before the goroutine to avoid closure issues.
+	srcOverride := sourceRootOverride
+	dstOverride := destRootOverride
 
 	go func() {
 		defer func() {
@@ -138,10 +142,17 @@ func (a *App) StartMigration(selectedIDs []string, selectivePaths map[string][]s
 			rep = reporter.New("logs")
 		}
 
-		r := runner.New(cfg, rep)
+		// Shallow copy is safe here: BackupRoot is a string (value type);
+		// Apps slice header is copied but the underlying array is only read, never mutated.
+		cfgCopy := *cfg
+		if srcOverride != "" {
+			cfgCopy.BackupRoot = srcOverride
+		}
+		r := runner.New(&cfgCopy, rep)
 		r.SetSelectedIDs(selectedIDs)
 		r.SetSelectivePaths(selectivePaths)
 		r.SetDryRun(dryRun)
+		r.SetDestRootOverride(dstOverride)
 		r.SetOnProgress(func(evt runner.ProgressEvent) {
 			runtime.EventsEmit(a.ctx, "progress", evt)
 		})
@@ -159,14 +170,16 @@ func (a *App) StartMigration(selectedIDs []string, selectivePaths map[string][]s
 		}
 
 		runtime.EventsEmit(a.ctx, "complete", SummaryResult{
-			Copied:       rep.NamesBy(reporter.StatusCopied),
-			Skipped:      rep.NamesBy(reporter.StatusSkipped),
-			Failed:       rep.NamesBy(reporter.StatusFailed),
-			Bytes:        result.TotalBytes,
-			Elapsed:      result.Elapsed.String(),
-			LogPath:      rep.LogPath(),
-			ManifestPath: manifestPath,
-			Manifest:     buildManifest(result),
+			Copied:             rep.NamesBy(reporter.StatusCopied),
+			Skipped:            rep.NamesBy(reporter.StatusSkipped),
+			Failed:             rep.NamesBy(reporter.StatusFailed),
+			Bytes:              result.TotalBytes,
+			Elapsed:            result.Elapsed.String(),
+			LogPath:            rep.LogPath(),
+			ManifestPath:       manifestPath,
+			SourceRootOverride: srcOverride,
+			DestRootOverride:   dstOverride,
+			Manifest:           buildManifest(result),
 		})
 	}()
 
