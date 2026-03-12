@@ -19,6 +19,10 @@ func ApplyDestOverride(resolvedTarget, destRoot string) string {
 		// Drive swap: replace first character (drive letter)
 		return string(destRoot[0]) + resolvedTarget[1:]
 	}
-	// Prefix substitution: strip "X:\" (first 3 chars) and prepend destRoot
+	// Prefix substitution: strip "X:\" (first 3 chars) and prepend destRoot.
+	// Ensure destRoot ends with \ so we don't join without a separator.
+	if len(destRoot) > 0 && destRoot[len(destRoot)-1] != '\\' {
+		destRoot += "\\"
+	}
 	return destRoot + resolvedTarget[3:]
 }

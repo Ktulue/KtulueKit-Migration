@@ -59,6 +59,12 @@ func TestApplyDestOverride(t *testing.T) {
 			dest:   `E:\Backup\New\`,
 			want:   `E:\Backup\New\SomeApp`,
 		},
+		{
+			name:   "prefix substitution without trailing backslash normalises correctly",
+			target: `C:\Users\Foo\AppData\Roaming\App`,
+			dest:   `D:\Restored`,
+			want:   `D:\Restored\Users\Foo\AppData\Roaming\App`,
+		},
 	}
 
 	for _, tc := range cases {
