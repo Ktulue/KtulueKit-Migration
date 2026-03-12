@@ -161,6 +161,22 @@ func (r *Runner) Run() RunResult {
 		} else if strategy == "selective" {
 			itemID := w.app.Name + ":" + w.item.Label
 			selectedPaths = r.selectivePaths[itemID]
+			if len(selectedPaths) == 0 {
+				// No paths chosen in picker — skip rather than silently copying nothing
+				r.reportItemFull(w.app.Name, w.item.Label, sourcePath, targetPath, reporter.StatusSkipped, 0, "no paths selected in folder picker", nil)
+				result.Items = append(result.Items, RunResultItem{
+					App: w.app.Name, Label: w.item.Label,
+					SourcePath: sourcePath, TargetPath: targetPath,
+					Status: reporter.StatusSkipped,
+				})
+				r.emitProgress(ProgressEvent{
+					Index: i + 1, Total: total,
+					App: w.app.Name, Label: w.item.Label,
+					Status: "skipped", Detail: "no paths selected in folder picker",
+					Elapsed: time.Since(start).Round(time.Second).String(),
+				})
+				continue
+			}
 			for _, p := range selectedPaths {
 				n, err := copier.CopyPath(p, filepath.Join(targetPath, filepath.Base(p)))
 				bytesCopied += n

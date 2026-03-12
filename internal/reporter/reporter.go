@@ -133,6 +133,12 @@ func (r *Reporter) LogPath() string {
 	return r.logPath
 }
 
+// Timestamp returns the time captured when this Reporter was created.
+// Use this to generate filenames that align with the log file timestamp.
+func (r *Reporter) Timestamp() time.Time {
+	return r.timestamp
+}
+
 // LogLine writes a formatted line to the log file only.
 func (r *Reporter) LogLine(format string, args ...interface{}) {
 	if r.logFile == nil {

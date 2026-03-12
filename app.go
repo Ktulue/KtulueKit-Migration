@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"sort"
 	"sync"
-	"time"
 
 	"github.com/Ktulue/KtulueKit-Migration/internal/config"
 	"github.com/Ktulue/KtulueKit-Migration/internal/mapper"
@@ -149,7 +148,7 @@ func (a *App) StartMigration(selectedIDs []string, selectivePaths map[string][]s
 
 		var manifestPath string
 		if !dryRun {
-			ts := time.Now().Format("2006-01-02_15-04-05")
+			ts := rep.Timestamp().Format("2006-01-02_15-04-05")
 			manifestPath = filepath.Join("logs", fmt.Sprintf("manifest_%s.json", ts))
 			if err := rep.WriteManifest(manifestPath); err != nil {
 				fmt.Fprintf(os.Stderr, "Warning: could not write manifest: %v\n", err)

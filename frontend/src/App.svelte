@@ -5,7 +5,7 @@
   import SummaryScreen from './screens/SummaryScreen.svelte'
   import FolderPicker from './components/FolderPicker.svelte'
   import { GetConfig, StartMigration, GetSourcePath } from '../wailsjs/go/main/App'
-  import { EventsOn } from '../wailsjs/runtime/runtime'
+  import { EventsOn, Quit } from '../wailsjs/runtime/runtime'
 
   let screen = 'selection' // 'selection' | 'progress' | 'summary'
   let configView = null
@@ -67,7 +67,7 @@
   }
 
   function handleClose() {
-    window.runtime.Quit()
+    Quit()
   }
 </script>
 
