@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"sync"
 
 	"github.com/Ktulue/KtulueKit-Migration/internal/config"
@@ -233,6 +234,91 @@ func (a *App) ValidateBackupRoot() (bool, error) {
 		return false, nil // not found — not an error, just absent
 	}
 	return info.IsDir(), nil
+}
+
+// BrowseForFolder opens a native OS directory picker dialog and returns
+// the selected folder path, or an empty string if cancelled.
+func (a *App) BrowseForFolder(startPath string) (string, error) {
+	selected, err := runtime.OpenDirectoryDialog(a.ctx, runtime.OpenDialogOptions{
+		DefaultDirectory: startPath,
+		Title:            "Select Folder",
+	})
+	if err != nil {
+		return "", err
+	}
+	return selected, nil
+}
+
+// PreflightCheck validates the source root, destination root, and all selected
+// item source paths before allowing the user to start migration.
+func (a *App) PreflightCheck(selectedIDs []string, sourceRoot string, destRoot string) (PreflightResult, error) {
+	cfg, err := config.Load(a.configPath)
+	if err != nil {
+		return PreflightResult{}, fmt.Errorf("loading config: %w", err)
+	}
+
+	result := PreflightResult{}
+
+	// Check 1: source root
+	if info, err := os.Stat(sourceRoot); err == nil && info.IsDir() {
+		result.SourceRootOK = true
+	}
+
+	// Check 2: destination root.
+	// DestRootOK = true means migration can proceed:
+	//   - blank destRoot → no override, always OK
+	//   - destRoot exists as dir → OK (already present)
+	//   - destRoot doesn't exist but parent does → OK (will be created at run time; drive is mounted)
+	// DestRootOK = false means hard block: the drive/parent is not accessible.
+	if destRoot == "" {
+		result.DestRootOK = true
+	} else {
+		if info, err := os.Stat(destRoot); err == nil && info.IsDir() {
+			result.DestRootOK = true
+		} else {
+			parent := filepath.Dir(strings.TrimRight(destRoot, `\/`))
+			if info, err := os.Stat(parent); err == nil && info.IsDir() {
+				result.DestRootOK = true
+			}
+		}
+	}
+
+	// Build selected ID set
+	selectedSet := make(map[string]bool, len(selectedIDs))
+	for _, id := range selectedIDs {
+		selectedSet[id] = true
+	}
+
+	// Check 3: per-item source paths
+	for _, app := range cfg.Apps {
+		for _, item := range app.Items {
+			id := app.Name + ":" + item.Label
+			if !selectedSet[id] {
+				continue
+			}
+			result.TotalCount++
+
+			sourcePath := mapper.BuildSourcePath(sourceRoot, item.Source)
+			_, statErr := os.Stat(sourcePath)
+			found := statErr == nil
+
+			label := app.Name + " — " + item.Label
+			if !found {
+				result.HasItemWarnings = true
+			} else {
+				result.ReadyCount++
+			}
+
+			result.Items = append(result.Items, PreflightItem{
+				ID:    id,
+				Label: label,
+				Path:  sourcePath,
+				Found: found,
+			})
+		}
+	}
+
+	return result, nil
 }
 
 // GetSourcePath resolves the backup source path for a given item ID.
