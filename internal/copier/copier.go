@@ -63,6 +63,19 @@ func CopyFile(src, dst string) (int64, error) {
 	return copyFile(src, dst)
 }
 
+// CopyPath copies src to dst. If src is a directory, MirrorDir is used.
+// If src is a file, CopyFile is used. Returns bytes copied.
+func CopyPath(src, dst string) (int64, error) {
+	info, err := os.Stat(src)
+	if err != nil {
+		return 0, fmt.Errorf("stat source: %w", err)
+	}
+	if info.IsDir() {
+		return MirrorDir(src, dst)
+	}
+	return CopyFile(src, dst)
+}
+
 // copyFile is the internal implementation that copies a single file.
 func copyFile(src, dst string) (int64, error) {
 	srcFile, err := os.Open(src)
