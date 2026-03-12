@@ -54,7 +54,7 @@ Applies only to Windows single-letter drive paths (`X:\`). UNC paths are not sup
 | `D:\Restored\` | `C:\Users\Foo\AppData\Roaming\App` | `D:\Restored\Users\Foo\AppData\Roaming\App` |
 | *(blank)* | `C:\Users\Foo\AppData\Roaming\App` | unchanged |
 
-**Edge case — resolved target has no drive prefix:** if `resolvedTarget` does not begin with the pattern `X:\` (letter + `:\`), `ApplyDestOverride` returns it unchanged and logs a warning. This handles the case where env-var expansion fails and leaves a relative path (which is a config error, not a runtime override error).
+**Edge case — resolved target has no drive prefix:** guard 2 predicate: `resolvedTarget` does not begin with `[A-Za-z]:\` (one ASCII letter followed by `:\`). When this guard fires, `ApplyDestOverride` returns `resolvedTarget` unchanged. In `PreflightCheck`, that item is included in the result with `Found = false` and a distinct `Label` suffix `[invalid target path]` appended so the user can distinguish it from a legitimately missing source. In `StartMigration`, the item is logged as failed with detail `"target path has no drive prefix"` and does not attempt a copy.
 
 **Coverage:** `ApplyDestOverride` is applied to all resolved target paths uniformly, including those resolved from env vars (e.g. `%APPDATA%`). This is intentional.
 
@@ -89,9 +89,9 @@ type PreflightResult struct {
 }
 
 type PreflightItem struct {
-    ID    string `json:"id"`
-    Label string `json:"label"`  // "AppName — ItemLabel"
-    Path  string `json:"path"`   // resolved source path that was actually checked
+    ID    string `json:"id"`    // app.Name + ":" + item.Label — canonical ID format used throughout codebase
+    Label string `json:"label"` // app.Name + " \u2014 " + item.Label — matches ItemView.Name from GetConfig
+    Path  string `json:"path"`  // resolved source path actually checked
     Found bool   `json:"found"`
 }
 ```
@@ -124,7 +124,7 @@ Reset does NOT trigger on every keystroke — only on field blur/confirm or sele
 func (a *App) PreflightCheck(selectedIDs []string, sourceRoot string, destRoot string) (PreflightResult, error)
 ```
 
-`PreflightCheck` loads config internally (same as `GetConfig` and `StartMigration` do). `PreflightItem.Label` is assembled as `app.Name + " — " + item.Label` — matching the format used in `GetConfig`'s `ItemView.Name` so panel labels are consistent with the selection list.
+`PreflightCheck` loads config internally (same as `GetConfig` and `StartMigration` do). `PreflightItem.Label` is assembled as `app.Name + " \u2014 " + item.Label` (space + U+2014 em-dash + space) — exactly matching the separator used in `GetConfig`'s `ItemView.Name` so panel labels are consistent with the selection list.
 
 ### Modified: `StartMigration`
 
@@ -144,7 +144,7 @@ func (a *App) StartMigration(
 
 **Destination override application:** wherever `StartMigration` calls `mapper.BuildTargetPath(item.Target)`, it wraps the result: `mapper.ApplyDestOverride(mapper.BuildTargetPath(item.Target), destRootOverride)`.
 
-**Manifest fields:** `StartMigration` writes `sourceRootOverride` and `destRootOverride` into the `SummaryResult` emitted on the Wails `"complete"` event.
+**Manifest fields:** `StartMigration` captures `sourceRootOverride` and `destRootOverride` into local copies before launching the goroutine, then writes them into the `SummaryResult` emitted on the Wails `"complete"` event. (Explicit closure capture prevents the goroutine reading stale/zeroed values.)
 
 **Frontend call site:** `App.svelte`'s `handleStartMigration` function must be updated to accept `sourceRoot` and `destRoot` parameters and pass them as the 4th and 5th arguments to the regenerated Wails binding for `StartMigration`.
 
@@ -211,7 +211,9 @@ Collapsible per-item list. Summary line: `N/M ready`. Shows "Run anyway" checkbo
 
 - `handleStartMigration(selectedIDs, selectivePaths, dryRun, sourceRoot, destRoot)` — passes `sourceRoot` and `destRoot` to the updated `StartMigration` binding
 - Stores received `SummaryResult` in a reactive variable `summaryResult`
-- `handleRunAgain` reads `summaryResult.sourceRootOverride` and `summaryResult.destRootOverride` from its own scope (no argument changes to `SummaryScreen`'s `onRunAgain` callback); transitions back to `SelectionScreen` passing the two values as props
+- Introduces two reactive variables: `let pendingSourceRoot = ''` and `let pendingDestRoot = ''`
+- `handleRunAgain` sets `pendingSourceRoot = summaryResult.sourceRootOverride ?? ''` and `pendingDestRoot = summaryResult.destRootOverride ?? ''`, then sets `screen = 'selection'`; no changes to `SummaryScreen`'s `onRunAgain` callback
+- The `<SelectionScreen>` binding in the template passes `initialSourceRoot={pendingSourceRoot}` and `initialDestRoot={pendingDestRoot}` so PathBar is pre-populated on re-entry
 
 ### Modified: `SelectionScreen.svelte` props
 
