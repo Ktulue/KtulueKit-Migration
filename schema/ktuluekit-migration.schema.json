@@ -59,7 +59,18 @@
           "category": {
             "type": "string",
             "description": "Grouping category for the UI.",
-            "examples": ["Streaming", "Browser & Identity", "Media Assets", "Shell & Terminal"]
+            "enum": [
+              "Streaming",
+              "Dev Tools",
+              "Creative Suite",
+              "Utilities",
+              "Browser & Identity",
+              "Communication",
+              "Media Assets",
+              "Shell & Terminal",
+              "Games",
+              "Personal Files"
+            ]
           },
           "items": {
             "type": "array",
@@ -84,9 +95,9 @@
                 },
                 "strategy": {
                   "type": "string",
-                  "enum": ["mirror", "file", "glob"],
+                  "enum": ["mirror", "file", "selective"],
                   "default": "mirror",
-                  "description": "Copy strategy. 'mirror' copies a full directory tree, 'file' copies a single file, 'glob' matches a pattern. Skateboard uses mirror only."
+                  "description": "Copy strategy. 'mirror' copies a full directory tree, 'file' copies a single file, 'selective' copies only specified entries."
                 },
                 "description": {
                   "type": "string",

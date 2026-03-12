@@ -9,9 +9,15 @@ type ConfigView struct {
 // categoryOrder defines the display sequence for migration categories.
 var categoryOrder = []string{
 	"Streaming",
+	"Dev Tools",
+	"Creative Suite",
+	"Utilities",
 	"Browser & Identity",
+	"Communication",
 	"Media Assets",
 	"Shell & Terminal",
+	"Games",
+	"Personal Files",
 }
 
 // CategoryView represents a named group of migration items.

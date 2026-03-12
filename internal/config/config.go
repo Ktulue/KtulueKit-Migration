@@ -37,7 +37,7 @@ type Item struct {
 	Label       string `json:"label"`
 	Source      string `json:"source"`
 	Target      string `json:"target"`
-	Strategy    string `json:"strategy,omitempty"` // "mirror" (default), "file", "glob" — skateboard uses mirror only
+	Strategy    string `json:"strategy,omitempty"` // "mirror" (default) | "file" | "selective"
 	Description string `json:"description,omitempty"`
 	Notes       string `json:"notes,omitempty"`
 }
