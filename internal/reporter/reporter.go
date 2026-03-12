@@ -3,6 +3,7 @@
 package reporter
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -18,28 +19,30 @@ const (
 
 // Result records the outcome of a single migration item.
 type Result struct {
-	App         string
-	Label       string
-	SourcePath  string
-	TargetPath  string
-	Status      string
-	BytesCopied int64
-	Detail      string
+	App           string
+	Label         string
+	SourcePath    string
+	TargetPath    string
+	Status        string
+	BytesCopied   int64
+	Detail        string
+	SelectedPaths []string
 }
 
 // Reporter collects migration results and maintains a log file.
 type Reporter struct {
-	results []Result
-	logFile *os.File
-	logPath string
+	results   []Result
+	logFile   *os.File
+	logPath   string
+	timestamp time.Time
 }
 
 // New creates a Reporter and opens a timestamped log file in the given directory.
 func New(logDir string) *Reporter {
 	_ = os.MkdirAll(logDir, 0755)
 
-	timestamp := time.Now().Format("2006-01-02_15-04-05")
-	logPath := filepath.Join(logDir, fmt.Sprintf("migration_%s.log", timestamp))
+	ts := time.Now()
+	logPath := filepath.Join(logDir, fmt.Sprintf("migration_%s.log", ts.Format("2006-01-02_15-04-05")))
 
 	f, err := os.Create(logPath)
 	if err != nil {
@@ -47,14 +50,20 @@ func New(logDir string) *Reporter {
 	}
 
 	r := &Reporter{
-		logFile: f,
-		logPath: logPath,
+		logFile:   f,
+		logPath:   logPath,
+		timestamp: ts,
 	}
 
-	r.LogLine("KtulueKit Migration — Run started at %s", time.Now().Format(time.RFC3339))
+	r.LogLine("KtulueKit Migration — Run started at %s", ts.UTC().Format(time.RFC3339))
 	r.LogLine("---")
 
 	return r
+}
+
+// NewNull returns a Reporter that discards all output. Used for dry-run mode.
+func NewNull() *Reporter {
+	return &Reporter{timestamp: time.Now()}
 }
 
 // Add records a result and writes it to both stdout and the log file.
@@ -137,6 +146,56 @@ func (r *Reporter) Close() {
 	if r.logFile != nil {
 		r.logFile.Close()
 	}
+}
+
+// manifestItem is the JSON structure for a single manifest entry.
+type manifestItem struct {
+	App           string   `json:"app"`
+	Label         string   `json:"label"`
+	SourcePath    string   `json:"sourcePath"`
+	TargetPath    string   `json:"targetPath"`
+	Status        string   `json:"status"`
+	BytesCopied   int64    `json:"bytesCopied"`
+	SelectedPaths []string `json:"selectedPaths"`
+}
+
+// manifest is the top-level JSON structure written for KtulueKit-Cleanup.
+type manifest struct {
+	Version string         `json:"version"`
+	RunAt   string         `json:"runAt"`
+	Items   []manifestItem `json:"items"`
+}
+
+// WriteManifest serializes all results to a JSON file at the given path.
+// This is the contract consumed by KtulueKit-Cleanup.
+func (r *Reporter) WriteManifest(path string) error {
+	items := make([]manifestItem, 0, len(r.results))
+	for _, res := range r.results {
+		sp := res.SelectedPaths
+		if sp == nil {
+			sp = []string{}
+		}
+		items = append(items, manifestItem{
+			App:           res.App,
+			Label:         res.Label,
+			SourcePath:    res.SourcePath,
+			TargetPath:    res.TargetPath,
+			Status:        res.Status,
+			BytesCopied:   res.BytesCopied,
+			SelectedPaths: sp,
+		})
+	}
+
+	data, err := json.MarshalIndent(manifest{
+		Version: "1.0",
+		RunAt:   r.timestamp.UTC().Format(time.RFC3339),
+		Items:   items,
+	}, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshalling manifest: %w", err)
+	}
+
+	return os.WriteFile(path, data, 0644)
 }
 
 func statusIcon(status string) string {
