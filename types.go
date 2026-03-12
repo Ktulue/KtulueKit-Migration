@@ -52,14 +52,16 @@ type ProfileView struct {
 
 // SummaryResult captures the outcome of a migration run.
 type SummaryResult struct {
-	Copied       []string        `json:"copied"`
-	Skipped      []string        `json:"skipped"`
-	Failed       []string        `json:"failed"`
-	Bytes        int64           `json:"bytes"`
-	Elapsed      string          `json:"elapsed"`
-	LogPath      string          `json:"logPath"`
-	ManifestPath string          `json:"manifestPath"`
-	Manifest     []ManifestEntry `json:"manifest"`
+	Copied                []string        `json:"copied"`
+	Skipped               []string        `json:"skipped"`
+	Failed                []string        `json:"failed"`
+	Bytes                 int64           `json:"bytes"`
+	Elapsed               string          `json:"elapsed"`
+	LogPath               string          `json:"logPath"`
+	ManifestPath          string          `json:"manifestPath"`
+	SourceRootOverride    string          `json:"sourceRootOverride,omitempty"`
+	DestRootOverride      string          `json:"destRootOverride,omitempty"`
+	Manifest              []ManifestEntry `json:"manifest"`
 }
 
 // ManifestEntry records a single copy operation for the user to review.
@@ -71,4 +73,22 @@ type ManifestEntry struct {
 	Status        string   `json:"status"`
 	BytesCopied   int64    `json:"bytesCopied"`
 	SelectedPaths []string `json:"selectedPaths"`
+}
+
+// PreflightResult is returned by the PreflightCheck backend method.
+type PreflightResult struct {
+	SourceRootOK    bool            `json:"sourceRootOK"`
+	DestRootOK      bool            `json:"destRootOK"`
+	HasItemWarnings bool            `json:"hasItemWarnings"`
+	Items           []PreflightItem `json:"items"`
+	ReadyCount      int             `json:"readyCount"`
+	TotalCount      int             `json:"totalCount"`
+}
+
+// PreflightItem records the check result for a single selected item.
+type PreflightItem struct {
+	ID    string `json:"id"`    // app.Name + ":" + item.Label
+	Label string `json:"label"` // app.Name + " — " + item.Label
+	Path  string `json:"path"`  // resolved source path actually checked
+	Found bool   `json:"found"`
 }
