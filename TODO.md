@@ -62,6 +62,16 @@
 
 ---
 
+## Phase 4b — Hardening & UX Additions
+- [x] Backup root status banner: green ✓ if mounted, amber ⚠ if missing (with ↺ Refresh button)
+- [x] Profile load clears stale picker selections (selectivePaths reset on profile change)
+- [x] Manifest path copy button in SummaryScreen (matches log copy button)
+- [x] FolderPicker: Escape key closes modal
+- [x] SummaryScreen: "Run Again" button returns to SelectionScreen without closing
+- [x] **Bug fix:** selective items now correctly added to `selected` set after picker confirm (were being silently dropped from StartMigration)
+
+---
+
 ## Phase 5 — End-to-End Testing
 - [ ] `%USERPROFILE%` resolves to E: drive correctly
 - [ ] Full Restore run completes on real backup
@@ -74,7 +84,7 @@
 ---
 
 ## Phase 6 — Build & Manifest Contract
-- [x] `wails build` produces `ktuluekit-migration.exe` (11 MB, `build/bin/`)
+- [x] `wails build` produces `ktuluekit-migration.exe` (11 MB, `build/bin/`) — rebuilt after Phase 4b
 - [ ] Exe runs standalone (no Go/Wails/Node on target) — verify on fresh W11
 - [x] Manifest format documented for KtulueKit-Cleanup dev (`docs/manifest-contract.md`)
 - [x] `.gitignore` confirmed to exclude `build/bin/`
