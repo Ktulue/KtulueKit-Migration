@@ -84,7 +84,8 @@ All design tokens declared on `:root` in `App.svelte`. Component files reference
 | `--font-size-sm` | `12px` | Metadata, counts, copy buttons |
 | `--font-size-base` | `15px` | Body text, item names, labels |
 | `--font-size-lg` | `16px` | Screen titles, section headers |
-| `--font-size-xl` | `18px` | App header |
+| `--font-size-xl` | `18px` | App header subtitle / secondary headings |
+| `--font-size-2xl` | `20px` | Main app title (h1 — "KtulueKit Migration") |
 
 #### Shape
 
@@ -107,14 +108,16 @@ Nunito bundled as `.woff2` files in `frontend/src/assets/fonts/`:
 
 Loaded via `@font-face` in App.svelte `<style>` block. No CDN. No `@import url(fonts.googleapis.com/...)`.
 
-### style.css
+### Box-sizing Reset
 
-`frontend/src/style.css` stripped to a minimal stub:
+`frontend/src/style.css` does not exist in this project. The box-sizing reset is applied via a `:global` block in App.svelte's `<style>` section:
+
 ```css
-*, *::before, *::after {
+:global(*, *::before, *::after) {
   box-sizing: border-box;
 }
 ```
+
 All real styles live in component `<style>` blocks or the App.svelte `:root`.
 
 ---
@@ -123,12 +126,12 @@ All real styles live in component `<style>` blocks or the App.svelte `:root`.
 
 ### Commit 1 — Token foundation
 
-**Files:** `App.svelte`, `frontend/src/style.css`, `frontend/src/assets/fonts/` (new)
+**Files:** `App.svelte`, `frontend/src/assets/fonts/` (new)
 
 - Add `:root` token block to App.svelte (all tokens above)
 - Add `@font-face` declarations for Nunito 400/600/700
 - Add `:global(body)` reset
-- Strip style.css to box-sizing stub
+- Add `:global(*, *::before, *::after) { box-sizing: border-box }` in App.svelte (no style.css exists to modify)
 - Download and commit the three `.woff2` font files
 - **No component changes in this commit** — purely additive infrastructure
 
@@ -152,12 +155,13 @@ Each gets the full **normalize → distill → polish → colorize → animate**
 
 ### SelectionScreen
 
-- Header: `--color-bg-secondary` background, `--font-size-xl` title, `--spacing-2xl` horizontal padding
+- Header: `--color-bg-secondary` background, `--font-size-2xl` title (h1), `--spacing-2xl` horizontal padding
 - PathBar + PreflightPanel sit below header in a shared `--color-bg-secondary` container — visually grouped as the "setup zone"
 - Preflight result rows: `--color-success` for mounted ✓, `--color-warning` for not-mounted ⚠, `--color-danger` for hard failures
 - Profile select + dry-run toggle: all controls use `--color-border-input` borders, `--radius`, token-referenced padding
-- Start Migration CTA: `--color-accent` background, `--color-accent-hover` on hover, `transform: scale(0.98)` on `:active`
-- Dry-run mode: button shifts to `--color-accent-disabled`; dry-run indicator uses `--color-warning` tint
+- **Pre-flight Check button** (footer, secondary): `--color-warning` text/border, `transparent` background — communicates "advisory action"
+- **Start Migration CTA** (footer, primary): `--color-accent` background, `--color-accent-hover` on hover, `transform: scale(0.98)` on `:active`
+- Dry-run mode: Start button shifts to `--color-accent-disabled`; dry-run indicator uses `--color-warning` tint
 
 ### ProgressScreen
 
@@ -173,8 +177,10 @@ Each gets the full **normalize → distill → polish → colorize → animate**
   - Danger badge: `rgba(255, 107, 107, 0.15)` fill, `rgba(255, 107, 107, 0.35)` border
   - Secondary badge: `--color-bg-hover` fill, `--color-border` border
 - Manifest table: distill pass tightens column widths, removes visual noise
+- Manifest table row coloring: `status-skipped` rows use `--color-warning` tint (not hardcoded amber)
 - Log/manifest copy buttons: `--color-text-tertiary`, hover to `--color-text-primary`, `100ms ease`
-- Run Again button: `--color-accent`
+- **Close button** (primary CTA): `--color-accent` background — this is the exit action
+- **Run Again button** (secondary): `--color-bg-hover` background, `--color-text-secondary` text, `--color-border` border — subordinate to Close
 
 ### PathBar + PreflightPanel
 
@@ -190,7 +196,7 @@ Each gets the full **normalize → distill → polish → colorize → animate**
 
 ### CategoryAccordion + ItemRow
 
-- Accordion headers: `--color-bg-secondary`, `--color-border` bottom border, `--spacing-lg` vertical padding
+- Accordion headers: `--color-bg-hover` (`#2a2a2a`), `--color-border` bottom border, `--spacing-lg` vertical padding
 - Checkboxes: `--color-accent` (single mode — no uninstall dual-accent complexity)
 - Row hover: `--color-bg-hover`, `100ms ease` transition
 - Selective strategy trigger button: `--color-accent` text, hover underline
