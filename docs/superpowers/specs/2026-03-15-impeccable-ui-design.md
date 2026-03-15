@@ -186,7 +186,7 @@ Each gets the full **normalize → distill → polish → colorize → animate**
 
 - Both live in the same `--color-bg-secondary` container, `--color-border` bottom border separating from item list
 - Inputs: `--color-border-input` border, `--color-bg-hover` on focus, `--radius`
-- Refresh button: `--color-text-secondary`, hover to `--color-accent`
+- Browse buttons (one per path row): `--color-text-secondary`, hover to `--color-accent`
 
 ### FolderPicker
 
