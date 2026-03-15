@@ -99,54 +99,56 @@
   .path-bar {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    padding: 7px 20px;
-    background: #141414;
-    border-bottom: 1px solid #333;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-2xl);
+    background: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border);
   }
 
   .path-row {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--spacing-md);
   }
 
   .path-label {
     width: 80px;
-    font-size: 12px;
-    color: #888;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
     flex-shrink: 0;
   }
 
   .path-input {
     flex: 1;
-    background: #2a2a2a;
-    color: #e0e0e0;
-    border: 1px solid #444;
-    border-radius: 4px;
-    padding: 4px 8px;
-    font-size: 12px;
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border-input);
+    border-radius: var(--radius);
+    padding: var(--spacing-xs) var(--spacing-md);
+    font-size: var(--font-size-sm);
     font-family: 'Cascadia Code', 'Consolas', monospace;
     min-width: 0;
+    transition: border-color 100ms ease;
   }
 
   .path-input:focus {
     outline: none;
-    border-color: #555;
+    border-color: var(--color-border-input);
   }
 
   .browse-btn {
     background: transparent;
-    color: #999;
-    border: 1px solid #444;
-    border-radius: 4px;
-    padding: 3px 10px;
-    font-size: 12px;
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border-input);
+    border-radius: var(--radius);
+    padding: var(--spacing-xs) var(--spacing-lg);
+    font-size: var(--font-size-sm);
     cursor: pointer;
     flex-shrink: 0;
+    transition: color 100ms ease, border-color 100ms ease;
   }
 
-  .browse-btn:hover { color: #e0e0e0; border-color: #666; }
+  .browse-btn:hover { color: var(--color-accent); border-color: var(--color-accent); }
 
   .icon {
     width: 18px;
@@ -155,8 +157,8 @@
     flex-shrink: 0;
   }
 
-  .icon-ok    { color: #2ea043; }
-  .icon-error { color: #d4a017; }
-  .icon-unchecked { color: #555; }
+  .icon-ok    { color: var(--color-success); }
+  .icon-error { color: var(--color-warning); }
+  .icon-unchecked { color: var(--color-border-input); }
   .icon-blank { color: transparent; }
 </style>
