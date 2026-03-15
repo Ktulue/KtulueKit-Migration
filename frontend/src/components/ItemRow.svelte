@@ -47,35 +47,36 @@
   .item-row {
     display: flex;
     align-items: center;
-    padding: 6px 0;
-    gap: 8px;
+    padding: var(--spacing-sm) 0;
+    gap: var(--spacing-md);
   }
   label {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--spacing-md);
     cursor: pointer;
     flex: 1;
-    font-size: 13px;
+    font-size: var(--font-size-sm);
   }
-  input[type="checkbox"] { accent-color: #2ea043; }
+  input[type="checkbox"] { accent-color: var(--color-accent); }
   .picker-btn {
     background: transparent;
-    color: #2ea043;
-    border: 1px solid #2ea043;
-    border-radius: 3px;
-    padding: 1px 8px;
-    font-size: 11px;
+    color: var(--color-accent);
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius);
+    padding: 1px var(--spacing-md);
+    font-size: var(--font-size-xs);
     cursor: pointer;
+    transition: color 100ms ease, border-color 100ms ease, background 100ms ease;
   }
-  .picker-btn:hover { background: rgba(46,160,67,0.1); }
+  .picker-btn:hover { background: rgba(14, 127, 212, 0.1); }
   .tooltip-trigger {
     position: relative;
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: #444;
-    color: #999;
+    background: var(--color-bg-hover);
+    color: var(--color-text-secondary);
     font-size: 11px;
     display: flex;
     align-items: center;
@@ -87,11 +88,11 @@
     position: absolute;
     bottom: calc(100% + 8px);
     right: 0;
-    background: #333;
-    color: #ddd;
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-size: 12px;
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--radius);
+    font-size: var(--font-size-sm);
     white-space: normal;
     width: 250px;
     z-index: 10;
