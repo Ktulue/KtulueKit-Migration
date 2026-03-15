@@ -58,28 +58,29 @@
 
 <style>
   .accordion {
-    margin-bottom: 0.25rem;
+    margin-bottom: var(--spacing-xs);
   }
 
   .header {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.6rem 0.75rem;
-    background: #2a2a2a;
-    border-radius: 4px;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: var(--color-bg-hover);
+    border-radius: var(--radius);
     cursor: pointer;
     user-select: none;
+    transition: background 100ms ease;
   }
 
   .header:hover {
-    background: #333;
+    background: var(--color-border-input);
   }
 
   .arrow {
-    font-size: 0.7rem;
-    color: #888;
-    transition: transform 0.15s;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    transition: transform 150ms ease;
   }
 
   .arrow.open {
@@ -88,31 +89,32 @@
 
   .name {
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: var(--font-size-base);
   }
 
   .count {
-    color: #888;
-    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
   }
 
   .select-all {
     margin-left: auto;
     background: transparent;
-    color: #999;
-    border: 1px solid #555;
-    border-radius: 4px;
-    padding: 0.15rem 0.5rem;
-    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border-input);
+    border-radius: var(--radius);
+    padding: 2px var(--spacing-sm);
+    font-size: var(--font-size-sm);
     cursor: pointer;
+    transition: color 100ms ease, border-color 100ms ease;
   }
 
   .select-all:hover {
-    color: #e0e0e0;
-    border-color: #888;
+    color: var(--color-text-primary);
+    border-color: var(--color-text-secondary);
   }
 
   .items {
-    padding-left: 1.5rem;
+    padding-left: var(--spacing-2xl);
   }
 </style>
