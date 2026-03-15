@@ -124,6 +124,11 @@
 </div>
 
 <style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
   .summary-screen {
     display: flex;
     flex-direction: column;
@@ -131,187 +136,196 @@
   }
 
   header {
-    padding: 12px 20px;
-    background: #111;
-    border-bottom: 1px solid #333;
+    padding: var(--spacing-lg) var(--spacing-2xl);
+    background: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border);
   }
 
   h2 {
     margin: 0;
-    font-size: 18px;
-    color: #e0e0e0;
+    font-size: var(--font-size-xl);
+    color: var(--color-text-primary);
   }
 
   .stats {
-    margin-top: 6px;
-    font-size: 13px;
-    color: #999;
+    margin-top: var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
   }
 
   .separator {
-    margin: 0 8px;
-    color: #555;
+    margin: 0 var(--spacing-md);
+    color: var(--color-border-input);
   }
 
   .content {
     flex: 1;
     overflow-y: auto;
-    padding: 20px;
+    padding: var(--spacing-2xl);
   }
 
   .section {
-    margin-bottom: 20px;
+    margin-bottom: var(--spacing-2xl);
+    animation: fadeIn 150ms ease both;
   }
 
+  .section:nth-child(1) { animation-delay: 0ms; }
+  .section:nth-child(2) { animation-delay: 50ms; }
+  .section:nth-child(3) { animation-delay: 100ms; }
+
   h3 {
-    margin: 0 0 8px 0;
-    font-size: 14px;
-    color: #ccc;
+    margin: 0 0 var(--spacing-md) 0;
+    font-size: var(--font-size-base);
+    color: var(--color-text-primary);
   }
 
   .item {
-    padding: 5px 0 5px 24px;
-    font-size: 13px;
-    color: #aaa;
-    border-bottom: 1px solid #222;
+    padding: var(--spacing-sm) 0 var(--spacing-sm) var(--spacing-2xl);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-tertiary);
+    border-bottom: 1px solid var(--color-bg-hover);
   }
 
   .manifest-toggle {
-    margin: 16px 0;
+    margin: var(--spacing-xl) 0;
   }
 
   .manifest-btn {
     background: transparent;
-    color: #2ea043;
-    border: 1px solid #2ea043;
-    border-radius: 4px;
-    padding: 6px 16px;
-    font-size: 13px;
+    color: var(--color-accent);
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius);
+    padding: var(--spacing-sm) var(--spacing-xl);
+    font-size: var(--font-size-sm);
     cursor: pointer;
+    transition: background 100ms ease;
   }
 
   .manifest-btn:hover {
-    background: rgba(46, 160, 67, 0.1);
+    background: rgba(14, 127, 212, 0.1);
   }
 
   .manifest {
     overflow-x: auto;
-    margin-top: 8px;
+    margin-top: var(--spacing-md);
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 12px;
+    font-size: var(--font-size-sm);
   }
 
   th {
     text-align: left;
-    padding: 8px;
-    background: #222;
-    color: #999;
-    border-bottom: 1px solid #333;
+    padding: var(--spacing-md);
+    background: var(--color-bg-hover);
+    color: var(--color-text-secondary);
+    border-bottom: 1px solid var(--color-border);
   }
 
   td {
-    padding: 6px 8px;
-    border-bottom: 1px solid #222;
-    color: #bbb;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom: 1px solid var(--color-bg-hover);
+    color: var(--color-text-tertiary);
   }
 
   .path {
     font-family: 'Cascadia Code', 'Consolas', monospace;
-    font-size: 12px;
-    color: #888;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
     max-width: 250px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  tr.status-copied td:nth-child(5) { color: #2ea043; }
-  tr.status-skipped td:nth-child(5) { color: #d4a017; }
-  tr.status-failed td:nth-child(5) { color: #e55; }
+  tr.status-copied td:nth-child(5) { color: var(--color-success); }
+  tr.status-skipped td:nth-child(5) { color: var(--color-warning); }
+  tr.status-failed td:nth-child(5) { color: var(--color-danger); }
 
   footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 20px;
-    background: #111;
-    border-top: 1px solid #333;
+    padding: var(--spacing-lg) var(--spacing-2xl);
+    background: var(--color-bg-secondary);
+    border-top: 1px solid var(--color-border);
   }
 
   .footer-info {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: var(--spacing-xs);
   }
 
   .log-path {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 12px;
+    gap: var(--spacing-md);
+    font-size: var(--font-size-sm);
   }
 
   .log-label {
-    color: #666;
+    color: var(--color-text-secondary);
   }
 
   .log-file {
-    color: #999;
+    color: var(--color-text-secondary);
     font-family: 'Cascadia Code', 'Consolas', monospace;
   }
 
   .copy-btn {
     background: transparent;
-    color: #999;
-    border: 1px solid #444;
-    border-radius: 4px;
-    padding: 3px 8px;
-    font-size: 12px;
+    color: var(--color-text-tertiary);
+    border: 1px solid var(--color-border-input);
+    border-radius: var(--radius);
+    padding: var(--spacing-xs) var(--spacing-md);
+    font-size: var(--font-size-sm);
     cursor: pointer;
+    transition: color 100ms ease, border-color 100ms ease;
   }
 
   .copy-btn:hover {
-    color: #e0e0e0;
-    border-color: #666;
+    color: var(--color-text-primary);
+    border-color: var(--color-border-input);
   }
 
   .footer-actions {
     display: flex;
-    gap: 8px;
+    gap: var(--spacing-md);
   }
 
   .run-again-btn {
-    background: transparent;
-    color: #999;
-    border: 1px solid #444;
-    border-radius: 6px;
-    padding: 8px 20px;
-    font-size: 14px;
+    background: var(--color-bg-hover);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: var(--spacing-md) var(--spacing-2xl);
+    font-size: var(--font-size-base);
     font-weight: 600;
     cursor: pointer;
+    transition: color 100ms ease, border-color 100ms ease;
   }
 
   .run-again-btn:hover {
-    color: #e0e0e0;
-    border-color: #666;
+    color: var(--color-text-primary);
+    border-color: var(--color-border-input);
   }
 
   .close-btn {
-    background: #2ea043;
+    background: var(--color-accent);
     color: #fff;
     border: none;
-    border-radius: 6px;
-    padding: 8px 20px;
-    font-size: 14px;
+    border-radius: var(--radius);
+    padding: var(--spacing-md) var(--spacing-2xl);
+    font-size: var(--font-size-base);
     font-weight: 600;
     cursor: pointer;
+    transition: background 100ms ease;
   }
 
   .close-btn:hover {
-    background: #3ab553;
+    background: var(--color-accent-hover);
   }
 </style>
