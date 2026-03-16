@@ -125,12 +125,94 @@
 </main>
 
 <style>
+  @font-face {
+    font-family: 'Nunito';
+    src: url('./assets/fonts/nunito-400.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Nunito';
+    src: url('./assets/fonts/nunito-600.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Nunito';
+    src: url('./assets/fonts/nunito-700.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  :root {
+    /* Font */
+    --font-primary: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+    /* Typography scale */
+    --font-size-xs:   11px;
+    --font-size-sm:   12px;
+    --font-size-base: 15px;
+    --font-size-lg:   16px;
+    --font-size-xl:   18px;
+    --font-size-2xl:  20px;
+
+    /* Shape */
+    --radius: 4px;
+
+    /* Spacing (4px grid) */
+    --spacing-xs:  4px;
+    --spacing-sm:  6px;
+    --spacing-md:  8px;
+    --spacing-lg:  12px;
+    --spacing-xl:  16px;
+    --spacing-2xl: 20px;
+
+    /* Colors — backgrounds */
+    --color-bg-primary:   #1a1a1a;
+    --color-bg-secondary: #111;
+    --color-bg-hover:     #2a2a2a;
+
+    /* Colors — borders */
+    --color-border:       #333;
+    --color-border-input: #555;
+
+    /* Colors — text */
+    --color-text-primary:   #e0e0e0;
+    --color-text-secondary: #888;
+    --color-text-tertiary:  #aaa;
+
+    /* Colors — accent (blue) */
+    --color-accent:          #0e7fd4;
+    --color-accent-hover:    #1290e8;
+    --color-accent-disabled: #444;
+
+    /* Colors — danger */
+    --color-danger:        #ff6b6b;
+    --color-danger-action: #c0392b;
+
+    /* Colors — success (Migration-specific) */
+    --color-success:       #2ea043;
+    --color-success-hover: #3ab854;
+
+    /* Colors — warning (Migration-specific) */
+    --color-warning:       #e6a817;
+    --color-warning-hover: #f0b929;
+  }
+
+  :global(*, *::before, *::after) {
+    box-sizing: border-box;
+  }
+
   :global(body) {
     margin: 0;
-    padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #1a1a1a;
-    color: #e0e0e0;
+    font-family: var(--font-primary);
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
   }
 
   main {
@@ -144,6 +226,6 @@
   }
 
   .error h2 {
-    color: #e55;
+    color: var(--color-danger);
   }
 </style>

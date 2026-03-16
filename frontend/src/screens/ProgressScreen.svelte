@@ -46,28 +46,28 @@
   }
 
   header {
-    padding: 12px 20px;
-    background: #111;
-    border-bottom: 1px solid #333;
+    padding: var(--spacing-lg) var(--spacing-2xl);
+    background: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border);
   }
 
   h2 {
     margin: 0 0 12px 0;
-    font-size: 18px;
-    color: #e0e0e0;
+    font-size: var(--font-size-xl);
+    color: var(--color-text-primary);
   }
 
   .progress-bar-container {
     width: 100%;
     height: 6px;
-    background: #333;
+    background: var(--color-border);
     border-radius: 3px;
     overflow: hidden;
   }
 
   .progress-bar {
     height: 100%;
-    background: #2ea043;
+    background: var(--color-accent);
     border-radius: 3px;
     transition: width 0.3s ease;
   }
@@ -75,22 +75,22 @@
   .progress-text {
     display: block;
     margin-top: 6px;
-    font-size: 12px;
-    color: #999;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
   }
 
   .dry-run-banner {
-    background: #2a2000;
-    color: #d4a017;
-    padding: 6px 20px;
-    font-size: 12px;
+    background: rgba(230, 168, 23, 0.08);
+    color: var(--color-warning);
+    padding: var(--spacing-sm) var(--spacing-2xl);
+    font-size: var(--font-size-sm);
     text-align: center;
-    border-bottom: 1px solid #3a3000;
+    border-bottom: 1px solid var(--color-border);
   }
 
   .feed {
     flex: 1;
     overflow-y: auto;
-    padding: 12px 20px;
+    padding: var(--spacing-lg) var(--spacing-2xl);
   }
 </style>
