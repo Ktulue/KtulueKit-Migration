@@ -1,7 +1,7 @@
 # KtulueKit Migration — How to Use
 
-> **Last updated:** 2026-03-12
-> **App version covers:** v1.0 feature set + path override / pre-flight check
+> **Last updated:** 2026-03-22
+> **App version covers:** v1.0 feature set + path override / pre-flight check + source discovery
 
 ---
 
@@ -34,6 +34,8 @@ Two fields:
 
 **Browse** buttons open a native folder picker for each field.
 
+**Scan** button (next to Source Browse) scans the source drive for all config items. See [Source Discovery](#source-discovery-scanning-a-cloned-drive) below.
+
 **Drive normalisation:** If you type just `D:` and click away, it automatically becomes `D:\`.
 
 **Destination override rules:**
@@ -58,6 +60,35 @@ Items marked `selective` in the config (Documents, Videos, Pictures, etc.) have 
 ### Dry Run toggle
 
 Enable **Dry run** (top-right, next to the profile dropdown) to simulate the migration without writing any files. The progress and summary screens will show exactly what *would* have happened. Use this to verify your setup before a real run.
+
+---
+
+## Source Discovery (scanning a cloned drive)
+
+If your source is a full clone of a Windows drive (e.g., your old W10 C:\ cloned to E:\), the app can automatically find where each item's data lives.
+
+### How to use it
+
+1. Set the **Source** field to the root of your cloned drive (e.g., `E:\`)
+2. Click the **Scan** button (green, next to Browse)
+3. The app scans `E:\Users\*` for user profiles, resolves each item's expected Windows path against the cloned drive, and reports results
+
+### What you'll see
+
+After scanning, each item in the selection list shows a status badge:
+
+| Badge | Meaning |
+|-------|---------|
+| **found** (green) | The item's data was located on the source drive. The item is automatically checked. |
+| **not found** (grey) | The item was not found. The item is dimmed and unchecked. |
+
+Items marked **not found** have a **Locate** button. Click it to manually browse the source drive and point the app to the correct folder.
+
+### How it works under the hood
+
+The scanner looks at each config item's *target* path (e.g., `%APPDATA%/obs-studio/basic`) and resolves the environment variables against the cloned drive's user profile structure. For example, `%APPDATA%` becomes `E:\Users\YourName\AppData\Roaming`. If multiple user profiles exist on the cloned drive, the one with the most matches wins.
+
+Discovered paths are held in memory for the session — the config file is never modified.
 
 ---
 
