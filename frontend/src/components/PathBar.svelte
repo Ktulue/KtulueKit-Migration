@@ -4,6 +4,7 @@
 
   export let sourceRoot = ''
   export let destRoot = ''
+  export let scanning = false
 
   const dispatch = createEventDispatcher()
 
@@ -19,6 +20,12 @@
 
   function emitChange() {
     dispatch('change', { sourceRoot, destRoot })
+  }
+
+  function handleScan() {
+    sourceRoot = normaliseDrive(sourceRoot)
+    emitChange()
+    dispatch('scan', { sourcePath: sourceRoot })
   }
 
   function handleSourceBlur() {
@@ -73,6 +80,9 @@
       spellcheck="false"
     />
     <button class="browse-btn" on:click={browseSource}>Browse</button>
+    <button class="scan-btn" on:click={handleScan} disabled={!sourceRoot || scanning}>
+      {scanning ? 'Scanning...' : 'Scan'}
+    </button>
     <span class="icon icon-{sourceIcon}" aria-label={sourceIcon}>
       {#if sourceIcon === 'ok'}✓{:else if sourceIcon === 'error'}⚠{:else if sourceIcon === 'unchecked'}—{/if}
     </span>
@@ -149,6 +159,25 @@
   }
 
   .browse-btn:hover { color: var(--color-accent); border-color: var(--color-accent); }
+
+  .scan-btn {
+    background: transparent;
+    color: var(--color-success);
+    border: 1px solid var(--color-success);
+    border-radius: var(--radius);
+    padding: var(--spacing-xs) var(--spacing-lg);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: color 100ms ease, border-color 100ms ease, background 100ms ease;
+  }
+  .scan-btn:hover:not(:disabled) {
+    background: rgba(46, 160, 67, 0.1);
+  }
+  .scan-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
 
   .icon {
     width: 18px;

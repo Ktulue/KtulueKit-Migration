@@ -2,7 +2,7 @@
   import CategoryAccordion from '../components/CategoryAccordion.svelte'
   import PathBar from '../components/PathBar.svelte'
   import PreflightPanel from '../components/PreflightPanel.svelte'
-  import { PreflightCheck } from '../../wailsjs/go/main/App'
+  import { PreflightCheck, ScanDrive, BrowseForFolder } from '../../wailsjs/go/main/App'
 
   export let configView
   export let onStart
@@ -21,6 +21,65 @@
   let preflightResult = null
   let preflightDone = false
   let runAnyway = false
+
+  let discoveryMap = {}
+  let scanning = false
+  let scanDone = false
+
+  async function handleAssist(item) {
+    try {
+      const chosen = await BrowseForFolder(sourceRoot)
+      if (chosen) {
+        discoveryMap = {
+          ...discoveryMap,
+          [item.id]: { ...discoveryMap[item.id], found: true, sourcePath: chosen }
+        }
+        selected.add(item.id)
+        selected = new Set(selected)
+      }
+    } catch (err) {
+      console.error('Assist browse failed:', err)
+    }
+  }
+
+  async function handleScan(e) {
+    const { sourcePath } = e.detail
+    if (!sourcePath) return
+    scanning = true
+    scanDone = false
+    discoveryMap = {}
+    try {
+      const result = await ScanDrive(sourcePath)
+      const map = {}
+      for (const item of result.items) {
+        map[item.id] = item
+      }
+      discoveryMap = map
+      scanDone = true
+
+      // Auto-select found items
+      for (const item of result.items) {
+        if (item.found) {
+          selected.add(item.id)
+        }
+      }
+      selected = new Set(selected)
+    } catch (err) {
+      console.error('Scan failed:', err)
+    } finally {
+      scanning = false
+    }
+  }
+
+  function buildSourcePathMap() {
+    const map = {}
+    for (const [id, item] of Object.entries(discoveryMap)) {
+      if (item.found && item.sourcePath) {
+        map[id] = item.sourcePath
+      }
+    }
+    return map
+  }
 
   function resetPreflight() {
     preflightResult = null
@@ -60,7 +119,7 @@
 
   async function handlePreflight() {
     try {
-      preflightResult = await PreflightCheck([...selected], sourceRoot, destRoot)
+      preflightResult = await PreflightCheck([...selected], sourceRoot, destRoot, buildSourcePathMap())
       preflightDone = true
     } catch (e) {
       preflightDone = false
@@ -73,7 +132,7 @@
   }
 
   function handleStart() {
-    onStart([...selected], {}, dryRun, sourceRoot, destRoot)
+    onStart([...selected], {}, dryRun, sourceRoot, destRoot, buildSourcePathMap())
   }
 
   $: selectedCount = selected.size
@@ -108,14 +167,16 @@
   <PathBar
     {sourceRoot}
     {destRoot}
+    {scanning}
     on:change={(e) => { sourceRoot = e.detail.sourceRoot; destRoot = e.detail.destRoot }}
+    on:scan={handleScan}
   />
 
   <PreflightPanel result={preflightResult} on:runAnyway={handleRunAnyway} />
 
   <div class="content">
     {#each configView.categories as category}
-      <CategoryAccordion {category} {selected} onToggle={handleToggle} onOpenPicker={handleOpenPickerWrapped} />
+      <CategoryAccordion {category} {selected} {discoveryMap} onToggle={handleToggle} onOpenPicker={handleOpenPickerWrapped} onAssist={handleAssist} />
     {/each}
   </div>
 

@@ -5,6 +5,8 @@
   export let selected
   export let onToggle
   export let onOpenPicker = () => {}
+  export let discoveryMap = {}
+  export let onAssist = () => {}
 
   let open = true
 
@@ -17,7 +19,9 @@
       category.items.forEach(item => selected.delete(item.id))
     } else {
       category.items.forEach(item => {
-        if (item.strategy === 'selective') return  // must use picker
+        if (item.strategy === 'selective') return
+        const disc = discoveryMap[item.id]
+        if (disc && !disc.found) return
         selected.add(item.id)
       })
     }
@@ -41,6 +45,8 @@
         <ItemRow
           {item}
           checked={selected.has(item.id)}
+          discoveryStatus={discoveryMap[item.id] || null}
+          {onAssist}
           onChange={() => {
             if (selected.has(item.id)) {
               selected.delete(item.id)
