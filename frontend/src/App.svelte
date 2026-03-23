@@ -37,12 +37,12 @@
     })
   })
 
-  async function handleStartMigration(selectedIDs, userSelectivePaths, isDryRun, sourceRoot, destRoot) {
+  async function handleStartMigration(selectedIDs, userSelectivePaths, isDryRun, sourceRoot, destRoot, sourcePathMap) {
     dryRun = isDryRun
     progressEvents = []
     screen = 'progress'
     try {
-      await StartMigration(selectedIDs, { ...selectivePaths, ...userSelectivePaths }, isDryRun, sourceRoot || '', destRoot || '')
+      await StartMigration(selectedIDs, { ...selectivePaths, ...userSelectivePaths }, isDryRun, sourceRoot || '', destRoot || '', sourcePathMap || {})
     } catch (err) {
       summaryResult = { failed: [err.toString()], copied: [], skipped: [], manifest: [] }
       screen = 'summary'

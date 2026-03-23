@@ -53,6 +53,7 @@ type Runner struct {
 	dryRun           bool
 	onProgress       func(ProgressEvent)
 	destRootOverride string
+	sourcePathMap    map[string]string
 }
 
 // New creates a Runner with the given config and reporter.
@@ -89,6 +90,11 @@ func (r *Runner) SetOnProgress(fn func(ProgressEvent)) {
 // SetDestRootOverride sets a runtime destination root override applied to all target paths.
 func (r *Runner) SetDestRootOverride(override string) {
 	r.destRootOverride = override
+}
+
+// SetSourcePathMap sets per-item source path overrides from discovery.
+func (r *Runner) SetSourcePathMap(m map[string]string) {
+	r.sourcePathMap = m
 }
 
 // Run executes the migration. It iterates through all selected items,
@@ -129,8 +135,14 @@ func (r *Runner) Run() RunResult {
 			Elapsed: elapsed.Round(time.Second).String(),
 		})
 
-		// Resolve source and target paths
-		sourcePath := mapper.BuildSourcePath(r.cfg.BackupRoot, w.item.Source)
+		// Check for discovered source path override first
+		sourcePath := ""
+		if r.sourcePathMap != nil {
+			sourcePath = r.sourcePathMap[w.id]
+		}
+		if sourcePath == "" {
+			sourcePath = mapper.BuildSourcePath(r.cfg.BackupRoot, w.item.Source)
+		}
 
 		// resolvedTarget is the fully env-var-expanded absolute path from the config.
 		// If env-var expansion succeeded, it will match X:\ on Windows.

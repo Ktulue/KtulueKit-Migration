@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/Ktulue/KtulueKit-Migration/internal/config"
+	"github.com/Ktulue/KtulueKit-Migration/internal/discovery"
 	"github.com/Ktulue/KtulueKit-Migration/internal/mapper"
 	"github.com/Ktulue/KtulueKit-Migration/internal/reporter"
 	"github.com/Ktulue/KtulueKit-Migration/internal/runner"
@@ -103,7 +104,7 @@ func (a *App) GetConfig() (*ConfigView, error) {
 
 // StartMigration validates selections and kicks off the migration in a goroutine.
 // Progress events are emitted to the frontend via Wails runtime events.
-func (a *App) StartMigration(selectedIDs []string, selectivePaths map[string][]string, dryRun bool, sourceRootOverride string, destRootOverride string) error {
+func (a *App) StartMigration(selectedIDs []string, selectivePaths map[string][]string, dryRun bool, sourceRootOverride string, destRootOverride string, sourcePathMap map[string]string) error {
 	if len(selectedIDs) == 0 {
 		return fmt.Errorf("no items selected")
 	}
@@ -119,6 +120,7 @@ func (a *App) StartMigration(selectedIDs []string, selectivePaths map[string][]s
 	// Capture overrides into locals before the goroutine to avoid closure issues.
 	srcOverride := sourceRootOverride
 	dstOverride := destRootOverride
+	srcPaths := sourcePathMap
 
 	go func() {
 		defer func() {
@@ -153,6 +155,7 @@ func (a *App) StartMigration(selectedIDs []string, selectivePaths map[string][]s
 		r.SetSelectivePaths(selectivePaths)
 		r.SetDryRun(dryRun)
 		r.SetDestRootOverride(dstOverride)
+		r.SetSourcePathMap(srcPaths)
 		r.SetOnProgress(func(evt runner.ProgressEvent) {
 			runtime.EventsEmit(a.ctx, "progress", evt)
 		})
@@ -262,9 +265,19 @@ func (a *App) BrowseForFolder(startPath string) (string, error) {
 	return selected, nil
 }
 
+// ScanDrive scans a drive path for app data matching the config items.
+// Used by the frontend to auto-discover source paths on a cloned drive.
+func (a *App) ScanDrive(drivePath string) (*discovery.Result, error) {
+	cfg, err := config.Load(a.configPath)
+	if err != nil {
+		return nil, fmt.Errorf("loading config: %w", err)
+	}
+	return discovery.Scan(a.ctx, drivePath, cfg)
+}
+
 // PreflightCheck validates the source root, destination root, and all selected
 // item source paths before allowing the user to start migration.
-func (a *App) PreflightCheck(selectedIDs []string, sourceRoot string, destRoot string) (PreflightResult, error) {
+func (a *App) PreflightCheck(selectedIDs []string, sourceRoot string, destRoot string, sourcePathMap map[string]string) (PreflightResult, error) {
 	cfg, err := config.Load(a.configPath)
 	if err != nil {
 		return PreflightResult{}, fmt.Errorf("loading config: %w", err)
@@ -311,7 +324,13 @@ func (a *App) PreflightCheck(selectedIDs []string, sourceRoot string, destRoot s
 			}
 			result.TotalCount++
 
-			sourcePath := mapper.BuildSourcePath(sourceRoot, item.Source)
+			sourcePath := ""
+			if sourcePathMap != nil {
+				sourcePath = sourcePathMap[id]
+			}
+			if sourcePath == "" {
+				sourcePath = mapper.BuildSourcePath(sourceRoot, item.Source)
+			}
 			_, statErr := os.Stat(sourcePath)
 			found := statErr == nil
 
