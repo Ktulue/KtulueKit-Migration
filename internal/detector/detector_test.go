@@ -177,3 +177,71 @@ func TestSearchForApp_NotFound(t *testing.T) {
 		t.Errorf("expected 0 candidates, got %d", len(candidates))
 	}
 }
+
+func TestDetect_Tier1Wins(t *testing.T) {
+	localProfile := t.TempDir()
+	expectedDest := filepath.Join(localProfile, "AppData", "Roaming", "obs-studio", "basic")
+	os.MkdirAll(expectedDest, 0755)
+
+	sourcePaths := map[string]string{
+		"OBS Studio:scenes & profiles": filepath.Join("E:", "Users", "Josh", "AppData", "Roaming", "obs-studio", "basic"),
+	}
+
+	results := Detect("OBS Studio", sourcePaths, nil, localProfile)
+
+	if len(results) != 1 {
+		t.Fatalf("expected 1 result, got %d", len(results))
+	}
+	r := results[0]
+	if r.Method != "path-mapping" {
+		t.Errorf("Method = %q, want path-mapping", r.Method)
+	}
+	if r.DestPath != expectedDest {
+		t.Errorf("DestPath = %q, want %q", r.DestPath, expectedDest)
+	}
+	if !r.Confirmed {
+		t.Error("expected Confirmed = true")
+	}
+}
+
+func TestDetect_Tier1Unconfirmed(t *testing.T) {
+	localProfile := t.TempDir()
+
+	sourcePaths := map[string]string{
+		"TestApp:data": filepath.Join("E:", "Users", "Josh", "AppData", "Roaming", "NonExistentApp"),
+	}
+
+	results := Detect("TestApp", sourcePaths, nil, localProfile)
+
+	if len(results) != 1 {
+		t.Fatalf("expected 1 result, got %d", len(results))
+	}
+	r := results[0]
+	if r.Method != "path-mapping" {
+		t.Errorf("Method = %q, want path-mapping", r.Method)
+	}
+	if r.Confirmed {
+		t.Error("expected Confirmed = false (dest doesn't exist)")
+	}
+}
+
+func TestDetect_NothingFound(t *testing.T) {
+	localProfile := t.TempDir()
+
+	sourcePaths := map[string]string{
+		"UnknownApp:data": filepath.Join("E:", "RandomPath", "data"),
+	}
+
+	results := Detect("UnknownApp", sourcePaths, nil, localProfile)
+
+	if len(results) != 1 {
+		t.Fatalf("expected 1 result, got %d", len(results))
+	}
+	r := results[0]
+	if r.DestPath != "" {
+		t.Errorf("expected empty DestPath, got %q", r.DestPath)
+	}
+	if r.Confirmed {
+		t.Error("expected Confirmed = false")
+	}
+}
