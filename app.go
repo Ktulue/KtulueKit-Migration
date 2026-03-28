@@ -105,7 +105,7 @@ func (a *App) GetConfig() (*ConfigView, error) {
 
 // StartMigration validates selections and kicks off the migration in a goroutine.
 // Progress events are emitted to the frontend via Wails runtime events.
-func (a *App) StartMigration(selectedIDs []string, selectivePaths map[string][]string, dryRun bool, sourceRootOverride string, destRootOverride string, sourcePathMap map[string]string) error {
+func (a *App) StartMigration(selectedIDs []string, selectivePaths map[string][]string, dryRun bool, sourceRootOverride string, destRootOverride string, sourcePathMap map[string]string, destPathMap map[string]string) error {
 	if len(selectedIDs) == 0 {
 		return fmt.Errorf("no items selected")
 	}
@@ -122,6 +122,7 @@ func (a *App) StartMigration(selectedIDs []string, selectivePaths map[string][]s
 	srcOverride := sourceRootOverride
 	dstOverride := destRootOverride
 	srcPaths := sourcePathMap
+	dstPaths := destPathMap
 
 	go func() {
 		defer func() {
@@ -157,6 +158,7 @@ func (a *App) StartMigration(selectedIDs []string, selectivePaths map[string][]s
 		r.SetDryRun(dryRun)
 		r.SetDestRootOverride(dstOverride)
 		r.SetSourcePathMap(srcPaths)
+		r.SetDestPathMap(dstPaths)
 		r.SetOnProgress(func(evt runner.ProgressEvent) {
 			runtime.EventsEmit(a.ctx, "progress", evt)
 		})
@@ -278,7 +280,7 @@ func (a *App) ScanDrive(drivePath string) (*discovery.Result, error) {
 
 // PreflightCheck validates the source root, destination root, and all selected
 // item source paths before allowing the user to start migration.
-func (a *App) PreflightCheck(selectedIDs []string, sourceRoot string, destRoot string, sourcePathMap map[string]string) (PreflightResult, error) {
+func (a *App) PreflightCheck(selectedIDs []string, sourceRoot string, destRoot string, sourcePathMap map[string]string, destPathMap map[string]string) (PreflightResult, error) {
 	cfg, err := config.Load(a.configPath)
 	if err != nil {
 		return PreflightResult{}, fmt.Errorf("loading config: %w", err)
@@ -335,6 +337,16 @@ func (a *App) PreflightCheck(selectedIDs []string, sourceRoot string, destRoot s
 			_, statErr := os.Stat(sourcePath)
 			found := statErr == nil
 
+			destPath := ""
+			destOK := true
+			if destPathMap != nil && destPathMap[id] != "" {
+				destPath = destPathMap[id]
+				parent := filepath.Dir(strings.TrimRight(destPath, `\/`))
+				if _, err := os.Stat(parent); err != nil {
+					destOK = false
+				}
+			}
+
 			label := app.Name + " — " + item.Label
 			if !found {
 				result.HasItemWarnings = true
@@ -343,10 +355,12 @@ func (a *App) PreflightCheck(selectedIDs []string, sourceRoot string, destRoot s
 			}
 
 			result.Items = append(result.Items, PreflightItem{
-				ID:    id,
-				Label: label,
-				Path:  sourcePath,
-				Found: found,
+				ID:       id,
+				Label:    label,
+				Path:     sourcePath,
+				Found:    found,
+				DestPath: destPath,
+				DestOK:   destOK,
 			})
 		}
 	}

@@ -87,10 +87,12 @@ type PreflightResult struct {
 
 // PreflightItem records the check result for a single selected item.
 type PreflightItem struct {
-	ID    string `json:"id"`    // app.Name + ":" + item.Label
-	Label string `json:"label"` // app.Name + " — " + item.Label
-	Path  string `json:"path"`  // resolved source path actually checked
-	Found bool   `json:"found"`
+	ID       string `json:"id"`              // app.Name + ":" + item.Label
+	Label    string `json:"label"`           // app.Name + " — " + item.Label
+	Path     string `json:"path"`            // resolved source path actually checked
+	Found    bool   `json:"found"`
+	DestPath string `json:"destPath,omitempty"` // override destination path (if set)
+	DestOK   bool   `json:"destOK"`             // false means parent dir not accessible
 }
 
 // DetectResultView is the display model for a single item's destination detection result.
