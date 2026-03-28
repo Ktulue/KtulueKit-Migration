@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/Ktulue/KtulueKit-Migration/internal/config"
+	"github.com/Ktulue/KtulueKit-Migration/internal/detector"
 	"github.com/Ktulue/KtulueKit-Migration/internal/discovery"
 	"github.com/Ktulue/KtulueKit-Migration/internal/mapper"
 	"github.com/Ktulue/KtulueKit-Migration/internal/reporter"
@@ -368,4 +369,44 @@ func (a *App) GetSourcePath(itemID string) (string, error) {
 		}
 	}
 	return "", fmt.Errorf("item not found: %s", itemID)
+}
+
+// DetectDestination runs destination detection for a single app's items.
+// sourcePathMap contains the discovered source paths (itemID -> absolute path).
+// Returns detection results per item.
+func (a *App) DetectDestination(appName string, sourcePathMap map[string]string) ([]DetectResultView, error) {
+	cfg, err := config.Load(a.configPath)
+	if err != nil {
+		return nil, fmt.Errorf("loading config: %w", err)
+	}
+
+	// Find the app in config
+	var detection *config.Detection
+	for _, app := range cfg.Apps {
+		if app.Name == appName {
+			detection = app.Detection
+			break
+		}
+	}
+
+	// Get current user's profile path
+	localProfile := os.Getenv("USERPROFILE")
+	if localProfile == "" {
+		return nil, fmt.Errorf("USERPROFILE environment variable not set")
+	}
+
+	results := detector.Detect(appName, sourcePathMap, detection, localProfile)
+
+	var views []DetectResultView
+	for _, r := range results {
+		views = append(views, DetectResultView{
+			ItemID:     r.ItemID,
+			DestPath:   r.DestPath,
+			Method:     r.Method,
+			Confirmed:  r.Confirmed,
+			Candidates: r.Candidates,
+		})
+	}
+
+	return views, nil
 }

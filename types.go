@@ -92,3 +92,12 @@ type PreflightItem struct {
 	Path  string `json:"path"`  // resolved source path actually checked
 	Found bool   `json:"found"`
 }
+
+// DetectResultView is the display model for a single item's destination detection result.
+type DetectResultView struct {
+	ItemID     string   `json:"itemId"`
+	DestPath   string   `json:"destPath"`
+	Method     string   `json:"method"`
+	Confirmed  bool     `json:"confirmed"`
+	Candidates []string `json:"candidates"`
+}
