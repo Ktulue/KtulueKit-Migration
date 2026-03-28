@@ -81,8 +81,39 @@ func Detect(appName string, sourcePaths map[string]string, detection *config.Det
 			continue
 		}
 
-		// Tier 2 placeholder — will be filled in Task 3
-		// For now, just return empty result
+		// Tier 2: detection hints
+		if detection != nil {
+			// Tier 2a: registry
+			if detection.Registry != "" {
+				if regPath, err := RegistryLookup(detection.Registry); err == nil && regPath != "" {
+					result.DestPath = regPath
+					result.Method = "registry"
+					_, statErr := os.Stat(regPath)
+					result.Confirmed = statErr == nil
+					results = append(results, result)
+					continue
+				}
+			}
+
+			// Tier 2b: search paths
+			if len(detection.SearchPaths) > 0 && detection.SearchTarget != "" {
+				candidates := SearchForApp(detection.SearchPaths, detection.SearchTarget, detection.Executable)
+				if len(candidates) == 1 {
+					result.DestPath = candidates[0]
+					result.Method = "search"
+					result.Confirmed = true
+					results = append(results, result)
+					continue
+				} else if len(candidates) > 1 {
+					result.Candidates = candidates
+					result.Method = "search"
+					results = append(results, result)
+					continue
+				}
+			}
+		}
+
+		// Nothing found
 		result.Method = ""
 		results = append(results, result)
 	}

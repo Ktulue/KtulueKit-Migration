@@ -109,3 +109,71 @@ func TestPatternMap_DestNotExist(t *testing.T) {
 		t.Errorf("got %q, want %q", result, expectedDest)
 	}
 }
+
+func TestSearchForApp_FindsTarget(t *testing.T) {
+	root := t.TempDir()
+	progFiles := filepath.Join(root, "Program Files")
+	appDir := filepath.Join(progFiles, "LurkBait")
+	os.MkdirAll(appDir, 0755)
+	os.WriteFile(filepath.Join(appDir, "LurkBait.exe"), []byte("exe"), 0644)
+
+	candidates := SearchForAppInRoots([]string{progFiles}, "LurkBait", "LurkBait.exe")
+	if len(candidates) != 1 {
+		t.Fatalf("expected 1 candidate, got %d", len(candidates))
+	}
+	if candidates[0] != appDir {
+		t.Errorf("got %q, want %q", candidates[0], appDir)
+	}
+}
+
+func TestSearchForApp_NoExeConfirmation(t *testing.T) {
+	root := t.TempDir()
+	progFiles := filepath.Join(root, "Program Files")
+	appDir := filepath.Join(progFiles, "SomeApp")
+	os.MkdirAll(appDir, 0755)
+
+	candidates := SearchForAppInRoots([]string{progFiles}, "SomeApp", "")
+	if len(candidates) != 1 {
+		t.Fatalf("expected 1 candidate, got %d", len(candidates))
+	}
+	if candidates[0] != appDir {
+		t.Errorf("got %q, want %q", candidates[0], appDir)
+	}
+}
+
+func TestSearchForApp_ExeMismatch(t *testing.T) {
+	root := t.TempDir()
+	progFiles := filepath.Join(root, "Program Files")
+	appDir := filepath.Join(progFiles, "LurkBait")
+	os.MkdirAll(appDir, 0755)
+	os.WriteFile(filepath.Join(appDir, "WrongApp.exe"), []byte("exe"), 0644)
+
+	candidates := SearchForAppInRoots([]string{progFiles}, "LurkBait", "LurkBait.exe")
+	if len(candidates) != 0 {
+		t.Errorf("expected 0 candidates (exe mismatch), got %d", len(candidates))
+	}
+}
+
+func TestSearchForApp_MultipleCandidates(t *testing.T) {
+	root := t.TempDir()
+	dir1 := filepath.Join(root, "ProgramFiles")
+	dir2 := filepath.Join(root, "SteamLibrary")
+	os.MkdirAll(filepath.Join(dir1, "LurkBait"), 0755)
+	os.MkdirAll(filepath.Join(dir2, "LurkBait"), 0755)
+
+	candidates := SearchForAppInRoots([]string{dir1, dir2}, "LurkBait", "")
+	if len(candidates) != 2 {
+		t.Errorf("expected 2 candidates, got %d", len(candidates))
+	}
+}
+
+func TestSearchForApp_NotFound(t *testing.T) {
+	root := t.TempDir()
+	progFiles := filepath.Join(root, "Program Files")
+	os.MkdirAll(progFiles, 0755)
+
+	candidates := SearchForAppInRoots([]string{progFiles}, "NonExistent", "")
+	if len(candidates) != 0 {
+		t.Errorf("expected 0 candidates, got %d", len(candidates))
+	}
+}
