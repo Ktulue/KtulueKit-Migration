@@ -25,11 +25,20 @@ type Metadata struct {
 	Repository  string `json:"repository,omitempty"`
 }
 
+// Detection holds optional hints for finding an app's data on the destination machine.
+type Detection struct {
+	Registry     string   `json:"registry,omitempty"`
+	SearchPaths  []string `json:"searchPaths,omitempty"`
+	SearchTarget string   `json:"searchTarget,omitempty"`
+	Executable   string   `json:"executable,omitempty"`
+}
+
 // App represents a single application whose state can be migrated.
 type App struct {
-	Name     string `json:"name"`
-	Category string `json:"category"`
-	Items    []Item `json:"items"`
+	Name      string     `json:"name"`
+	Category  string     `json:"category"`
+	Detection *Detection `json:"detection,omitempty"`
+	Items     []Item     `json:"items"`
 }
 
 // Item is a single file or directory copy operation within an App.

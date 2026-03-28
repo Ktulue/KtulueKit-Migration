@@ -72,6 +72,32 @@
               "Personal Files"
             ]
           },
+          "detection": {
+            "type": "object",
+            "description": "Optional hints for finding this app's data on the destination machine. Used when standard path pattern mapping fails.",
+            "properties": {
+              "registry": {
+                "type": "string",
+                "description": "Windows registry key to query for the app's install or data path.",
+                "examples": ["HKCU\\Software\\LurkBait\\InstallPath"]
+              },
+              "searchPaths": {
+                "type": "array",
+                "description": "Directories to scan relative to drive roots. The tool checks all available drives.",
+                "items": { "type": "string" },
+                "examples": [["Program Files", "Program Files (x86)", "SteamLibrary/steamapps/common"]]
+              },
+              "searchTarget": {
+                "type": "string",
+                "description": "Folder name to look for within search paths."
+              },
+              "executable": {
+                "type": "string",
+                "description": "Executable name to confirm the correct folder was found.",
+                "examples": ["LurkBait.exe"]
+              }
+            }
+          },
           "items": {
             "type": "array",
             "description": "Individual file or directory copy operations for this app.",
