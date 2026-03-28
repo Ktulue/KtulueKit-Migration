@@ -1,7 +1,7 @@
 # KtulueKit Migration — How to Use
 
-> **Last updated:** 2026-03-22
-> **App version covers:** v1.0 feature set + path override / pre-flight check + source discovery
+> **Last updated:** 2026-03-28
+> **App version covers:** v1.0 feature set + path override / pre-flight check + source discovery + destination detection
 
 ---
 
@@ -89,6 +89,41 @@ Items marked **not found** have a **Locate** button. Click it to manually browse
 The scanner looks at each config item's *target* path (e.g., `%APPDATA%/obs-studio/basic`) and resolves the environment variables against the cloned drive's user profile structure. For example, `%APPDATA%` becomes `E:\Users\YourName\AppData\Roaming`. If multiple user profiles exist on the cloned drive, the one with the most matches wins.
 
 Discovered paths are held in memory for the session — the config file is never modified.
+
+---
+
+## Destination Detection (smart target resolution)
+
+After scanning your source drive, the app can figure out where each item should go on your current machine — so you don't have to know the exact `%APPDATA%` path for every app.
+
+### How to use it
+
+1. **Scan your source drive** first (see above) — items need discovered source paths before detection works
+2. In the item list, you'll see **Detect** buttons next to each app name that has discovered sources
+3. Click **Detect** on an app (e.g., "OBS Studio") — the tool resolves where those files should land on this machine
+4. Results appear inline on each item as destination badges and a clickable path
+
+### What you'll see
+
+After detection, each item shows a destination badge:
+
+| Badge | Meaning |
+|-------|---------|
+| **confirmed** (green) | The destination path was resolved and the folder exists on this machine. |
+| **unconfirmed** (yellow) | The destination path was resolved but the folder doesn't exist yet. It will be created during migration. |
+| **dest not found** (red) | The tool couldn't figure out where this app's data goes. You need to set it manually. |
+
+Next to the badge, the resolved destination path is shown as a clickable link. Click it to **override** the destination with a folder picker if the auto-resolved path isn't right.
+
+For items marked **dest not found**, a **Set destination** button lets you browse to the correct location.
+
+### How it works under the hood
+
+**Tier 1 — Path pattern mapping (automatic):** The tool looks at where the source files were found (e.g., `E:\Users\Josh\AppData\Roaming\obs-studio\basic`) and remaps the drive letter and username to your current machine (e.g., `C:\Users\YourName\AppData\Roaming\obs-studio\basic`). This handles ~80% of apps — anything that stores data in standard Windows user profile locations.
+
+**Tier 2 — Detection hints (config-driven):** For apps that don't follow standard paths (games, portable installs), the config can include a `detection` block with registry keys to check or directories to search. The tool tries these as a fallback when Tier 1 doesn't match.
+
+Detection results are held in memory for the session. Per-item detected destinations take precedence over the global Destination override in the path bar.
 
 ---
 

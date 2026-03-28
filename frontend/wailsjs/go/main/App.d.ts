@@ -5,16 +5,18 @@ import {discovery} from '../models';
 
 export function BrowseForFolder(arg1:string):Promise<string>;
 
+export function DetectDestination(arg1:string,arg2:Record<string, string>):Promise<Array<main.DetectResultView>>;
+
 export function GetConfig():Promise<main.ConfigView>;
 
 export function GetSourcePath(arg1:string):Promise<string>;
 
 export function ListFolder(arg1:string):Promise<Array<main.FolderEntry>>;
 
-export function PreflightCheck(arg1:Array<string>,arg2:string,arg3:string,arg4:Record<string, string>):Promise<main.PreflightResult>;
+export function PreflightCheck(arg1:Array<string>,arg2:string,arg3:string,arg4:Record<string, string>,arg5:Record<string, string>):Promise<main.PreflightResult>;
 
 export function ScanDrive(arg1:string):Promise<discovery.Result>;
 
-export function StartMigration(arg1:Array<string>,arg2:Record<string, Array<string>>,arg3:boolean,arg4:string,arg5:string,arg6:Record<string, string>):Promise<void>;
+export function StartMigration(arg1:Array<string>,arg2:Record<string, Array<string>>,arg3:boolean,arg4:string,arg5:string,arg6:Record<string, string>,arg7:Record<string, string>):Promise<void>;
 
 export function ValidateBackupRoot():Promise<boolean>;

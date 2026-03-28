@@ -56,6 +56,43 @@ func TestRunner_SelectiveStrategy(t *testing.T) {
 	}
 }
 
+func TestRunner_UsesDestPathMap(t *testing.T) {
+	tmp := t.TempDir()
+
+	// Create source files
+	srcDir := filepath.Join(tmp, "mirror")
+	os.MkdirAll(srcDir, 0755)
+	os.WriteFile(filepath.Join(srcDir, "file.txt"), []byte("hello"), 0644)
+
+	// Custom destination from detection
+	customDest := filepath.Join(t.TempDir(), "custom-dest")
+
+	cfg := makeTestConfig(t, tmp)
+	rep := reporter.NewNull()
+	r := runner.New(cfg, rep)
+	r.SetSelectedIDs([]string{"TestApp:mirror item"})
+	r.SetDestPathMap(map[string]string{
+		"TestApp:mirror item": customDest,
+	})
+
+	result := r.Run()
+
+	if len(result.Items) != 1 {
+		t.Fatalf("expected 1 result, got %d", len(result.Items))
+	}
+	if result.Items[0].Status != reporter.StatusCopied {
+		t.Errorf("expected copied, got %s", result.Items[0].Status)
+	}
+	if result.Items[0].TargetPath != customDest {
+		t.Errorf("TargetPath = %q, want %q", result.Items[0].TargetPath, customDest)
+	}
+
+	// Verify file landed in custom destination
+	if _, err := os.Stat(filepath.Join(customDest, "file.txt")); err != nil {
+		t.Error("file.txt should have been copied to custom destination")
+	}
+}
+
 func TestRunner_DryRun_NoFilesWritten(t *testing.T) {
 	tmp := t.TempDir()
 	srcDir := filepath.Join(tmp, "mirror")

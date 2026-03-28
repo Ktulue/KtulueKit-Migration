@@ -105,6 +105,11 @@
     {
       "name": "LurkBait Twitch Fishing",
       "category": "Games",
+      "detection": {
+        "searchPaths": ["Program Files", "Program Files (x86)", "SteamLibrary/steamapps/common", "Games"],
+        "searchTarget": "LurkBait Twitch Fishing",
+        "executable": "LurkBait Twitch Fishing.exe"
+      },
       "items": [
         {
           "label": "save data & custom catches",

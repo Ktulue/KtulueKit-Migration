@@ -6,7 +6,10 @@
   export let onToggle
   export let onOpenPicker = () => {}
   export let discoveryMap = {}
+  export let destMap = {}
   export let onAssist = () => {}
+  export let onDetect = () => {}
+  export let onDestOverride = () => {}
 
   let open = true
 
@@ -27,6 +30,12 @@
     }
     onToggle()
   }
+
+  $: discoveredApps = [...new Set(
+    category.items
+      .filter(item => discoveryMap[item.id]?.found)
+      .map(item => item.id.split(':')[0])
+  )]
 </script>
 
 <div class="accordion">
@@ -41,12 +50,22 @@
 
   {#if open}
     <div class="items">
+      {#each discoveredApps as appName}
+        <div class="app-detect-row">
+          <span class="app-detect-label">{appName}</span>
+          <button class="detect-btn" on:click|stopPropagation={() => onDetect(appName)}>
+            Detect
+          </button>
+        </div>
+      {/each}
       {#each category.items as item}
         <ItemRow
           {item}
           checked={selected.has(item.id)}
           discoveryStatus={discoveryMap[item.id] || null}
+          destResult={destMap[item.id] || null}
           {onAssist}
+          {onDestOverride}
           onChange={() => {
             if (selected.has(item.id)) {
               selected.delete(item.id)
@@ -122,5 +141,30 @@
 
   .items {
     padding-left: var(--spacing-2xl);
+  }
+
+  .app-detect-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-xs) 0;
+  }
+  .app-detect-label {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    font-weight: 600;
+  }
+  .detect-btn {
+    background: transparent;
+    color: var(--color-accent);
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius);
+    padding: 2px var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: color 100ms ease, border-color 100ms ease, background 100ms ease;
+  }
+  .detect-btn:hover {
+    background: rgba(14, 127, 212, 0.1);
   }
 </style>
