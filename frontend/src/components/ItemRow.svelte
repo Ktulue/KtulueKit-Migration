@@ -5,6 +5,8 @@
   export let onOpenPicker = () => {}
   export let discoveryStatus = null
   export let onAssist = () => {}
+  export let destResult = null
+  export let onDestOverride = () => {}
 
   let showTooltip = false
   $: tooltipText = item.description || item.notes || ''
@@ -12,6 +14,9 @@
   $: discovered = discoveryStatus !== null
   $: discoveredFound = discoveryStatus?.found ?? false
   $: discoveredNotFound = discovered && !discoveredFound
+  $: hasDestination = destResult?.destPath
+  $: destConfirmed = destResult?.confirmed ?? false
+  $: destMethod = destResult?.method || ''
 </script>
 
 <div class="item-row" class:dimmed={discoveredNotFound}>
@@ -50,6 +55,17 @@
       <button class="picker-btn" on:click|stopPropagation={() => onOpenPicker(item)}>
         Edit selection
       </button>
+    {/if}
+    {#if hasDestination}
+      <span class="dest-badge" class:confirmed={destConfirmed} class:unconfirmed={!destConfirmed}>
+        {destConfirmed ? 'confirmed' : 'unconfirmed'}
+      </span>
+      <button class="dest-path-btn" on:click|stopPropagation={() => onDestOverride(item.id)} title="Click to override">
+        {destResult.destPath}
+      </button>
+    {:else if destResult && !hasDestination}
+      <span class="dest-badge not-found">dest not found</span>
+      <button class="assist-btn" on:click|stopPropagation={() => onDestOverride(item.id)}>Set destination</button>
     {/if}
   </label>
   {#if tooltipText}
@@ -141,6 +157,42 @@
     transition: color 100ms ease, border-color 100ms ease, background 100ms ease;
   }
   .picker-btn:hover { background: rgba(14, 127, 212, 0.1); }
+  .dest-badge {
+    font-size: var(--font-size-xs);
+    padding: 1px 6px;
+    border-radius: var(--radius);
+    font-weight: 600;
+  }
+  .dest-badge.confirmed {
+    color: var(--color-success);
+    background: rgba(46, 160, 67, 0.12);
+  }
+  .dest-badge.unconfirmed {
+    color: var(--color-warning);
+    background: rgba(230, 168, 23, 0.12);
+  }
+  .dest-badge.not-found {
+    color: var(--color-danger);
+    background: rgba(255, 107, 107, 0.12);
+  }
+  .dest-path-btn {
+    background: transparent;
+    color: var(--color-text-tertiary);
+    border: none;
+    padding: 0;
+    font-size: var(--font-size-xs);
+    font-family: 'Cascadia Code', 'Consolas', monospace;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .dest-path-btn:hover {
+    color: var(--color-accent);
+  }
   .tooltip-trigger {
     position: relative;
     width: 18px;

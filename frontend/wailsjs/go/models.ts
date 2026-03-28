@@ -159,6 +159,26 @@ export namespace main {
 		    return a;
 		}
 	}
+	export class DetectResultView {
+	    itemId: string;
+	    destPath: string;
+	    method: string;
+	    confirmed: boolean;
+	    candidates: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new DetectResultView(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.itemId = source["itemId"];
+	        this.destPath = source["destPath"];
+	        this.method = source["method"];
+	        this.confirmed = source["confirmed"];
+	        this.candidates = source["candidates"];
+	    }
+	}
 	export class FolderEntry {
 	    name: string;
 	    path: string;
@@ -183,6 +203,8 @@ export namespace main {
 	    label: string;
 	    path: string;
 	    found: boolean;
+	    destPath?: string;
+	    destOK: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new PreflightItem(source);
@@ -194,6 +216,8 @@ export namespace main {
 	        this.label = source["label"];
 	        this.path = source["path"];
 	        this.found = source["found"];
+	        this.destPath = source["destPath"];
+	        this.destOK = source["destOK"];
 	    }
 	}
 	export class PreflightResult {

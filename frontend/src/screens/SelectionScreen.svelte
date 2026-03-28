@@ -2,7 +2,7 @@
   import CategoryAccordion from '../components/CategoryAccordion.svelte'
   import PathBar from '../components/PathBar.svelte'
   import PreflightPanel from '../components/PreflightPanel.svelte'
-  import { PreflightCheck, ScanDrive, BrowseForFolder } from '../../wailsjs/go/main/App'
+  import { PreflightCheck, ScanDrive, BrowseForFolder, DetectDestination } from '../../wailsjs/go/main/App'
 
   export let configView
   export let onStart
@@ -23,6 +23,7 @@
   let runAnyway = false
 
   let discoveryMap = {}
+  let destMap = {}
   let scanning = false
   let scanDone = false
 
@@ -69,6 +70,56 @@
     } finally {
       scanning = false
     }
+  }
+
+  async function handleDetect(appName) {
+    const appSourcePaths = {}
+    for (const [id, item] of Object.entries(discoveryMap)) {
+      if (item.found && item.sourcePath && id.startsWith(appName + ':')) {
+        appSourcePaths[id] = item.sourcePath
+      }
+    }
+    if (Object.keys(appSourcePaths).length === 0) return
+
+    try {
+      const results = await DetectDestination(appName, appSourcePaths)
+      for (const r of results) {
+        destMap[r.itemId] = r
+      }
+      destMap = { ...destMap }
+    } catch (err) {
+      console.error('Detection failed:', err)
+    }
+  }
+
+  async function handleDestOverride(itemId) {
+    try {
+      const current = destMap[itemId]?.destPath || ''
+      const chosen = await BrowseForFolder(current)
+      if (chosen) {
+        destMap[itemId] = {
+          ...destMap[itemId],
+          itemId,
+          destPath: chosen,
+          method: 'manual',
+          confirmed: true,
+          candidates: []
+        }
+        destMap = { ...destMap }
+      }
+    } catch (err) {
+      console.error('Dest browse failed:', err)
+    }
+  }
+
+  function buildDestPathMap() {
+    const map = {}
+    for (const [id, result] of Object.entries(destMap)) {
+      if (result.destPath) {
+        map[id] = result.destPath
+      }
+    }
+    return map
   }
 
   function buildSourcePathMap() {
@@ -119,7 +170,7 @@
 
   async function handlePreflight() {
     try {
-      preflightResult = await PreflightCheck([...selected], sourceRoot, destRoot, buildSourcePathMap())
+      preflightResult = await PreflightCheck([...selected], sourceRoot, destRoot, buildSourcePathMap(), buildDestPathMap())
       preflightDone = true
     } catch (e) {
       preflightDone = false
@@ -132,7 +183,7 @@
   }
 
   function handleStart() {
-    onStart([...selected], {}, dryRun, sourceRoot, destRoot, buildSourcePathMap())
+    onStart([...selected], {}, dryRun, sourceRoot, destRoot, buildSourcePathMap(), buildDestPathMap())
   }
 
   $: selectedCount = selected.size
@@ -176,7 +227,7 @@
 
   <div class="content">
     {#each configView.categories as category}
-      <CategoryAccordion {category} {selected} {discoveryMap} onToggle={handleToggle} onOpenPicker={handleOpenPickerWrapped} onAssist={handleAssist} />
+      <CategoryAccordion {category} {selected} {discoveryMap} {destMap} onToggle={handleToggle} onOpenPicker={handleOpenPickerWrapped} onAssist={handleAssist} onDetect={handleDetect} onDestOverride={handleDestOverride} />
     {/each}
   </div>
 

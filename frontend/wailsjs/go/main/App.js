@@ -6,6 +6,10 @@ export function BrowseForFolder(arg1) {
   return window['go']['main']['App']['BrowseForFolder'](arg1);
 }
 
+export function DetectDestination(arg1, arg2) {
+  return window['go']['main']['App']['DetectDestination'](arg1, arg2);
+}
+
 export function GetConfig() {
   return window['go']['main']['App']['GetConfig']();
 }
@@ -18,16 +22,16 @@ export function ListFolder(arg1) {
   return window['go']['main']['App']['ListFolder'](arg1);
 }
 
-export function PreflightCheck(arg1, arg2, arg3, arg4) {
-  return window['go']['main']['App']['PreflightCheck'](arg1, arg2, arg3, arg4);
+export function PreflightCheck(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['main']['App']['PreflightCheck'](arg1, arg2, arg3, arg4, arg5);
 }
 
 export function ScanDrive(arg1) {
   return window['go']['main']['App']['ScanDrive'](arg1);
 }
 
-export function StartMigration(arg1, arg2, arg3, arg4, arg5, arg6) {
-  return window['go']['main']['App']['StartMigration'](arg1, arg2, arg3, arg4, arg5, arg6);
+export function StartMigration(arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
+  return window['go']['main']['App']['StartMigration'](arg1, arg2, arg3, arg4, arg5, arg6, arg7);
 }
 
 export function ValidateBackupRoot() {
